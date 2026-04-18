@@ -1,0 +1,89 @@
+{
+  "version": "1.0.0",
+  "updatedAt": "2026-04-16",
+  "models": [
+    {
+      "id": "deepseek-chat",
+      "provider": "deepseek",
+      "displayName": "DeepSeek V3",
+      "strengths": ["coding", "reasoning", "math", "debugging"],
+      "contextWindow": 65536,
+      "costPer1kInput": 0.00014,
+      "costPer1kOutput": 0.00028,
+      "tier": "workhorse",
+      "isBenchmark": false,
+      "verifyEndpoint": "/models",
+      "verifyMethod": "GET"
+    },
+    {
+      "id": "gemini-2.0-flash",
+      "provider": "google",
+      "displayName": "Gemini 2.0 Flash",
+      "strengths": ["long_context", "summarization", "general", "speed"],
+      "contextWindow": 1048576,
+      "costPer1kInput": 0.0000375,
+      "costPer1kOutput": 0.00015,
+      "tier": "workhorse",
+      "isBenchmark": false,
+      "verifyEndpoint": "/models",
+      "verifyMethod": "GET"
+    },
+    {
+      "id": "claude-sonnet-4-20250514",
+      "provider": "anthropic",
+      "displayName": "Claude Sonnet 4",
+      "strengths": ["writing", "analysis", "nuance", "instruction_following"],
+      "contextWindow": 200000,
+      "costPer1kInput": 0.003,
+      "costPer1kOutput": 0.015,
+      "tier": "premium",
+      "isBenchmark": false,
+      "verifyEndpoint": "/messages",
+      "verifyMethod": "POST"
+    },
+    {
+      "id": "gpt-4o",
+      "provider": "openai",
+      "displayName": "GPT-4o",
+      "strengths": ["reasoning", "coding", "general", "vision"],
+      "contextWindow": 128000,
+      "costPer1kInput": 0.0025,
+      "costPer1kOutput": 0.01,
+      "tier": "premium",
+      "isBenchmark": false,
+      "verifyEndpoint": "/models",
+      "verifyMethod": "GET"
+    },
+    {
+      "id": "llama-3.3-70b-versatile",
+      "provider": "groq",
+      "displayName": "Llama 3.3 70B (Groq)",
+      "strengths": ["speed", "general", "coding", "reasoning"],
+      "contextWindow": 32768,
+      "costPer1kInput": 0.00059,
+      "costPer1kOutput": 0.00079,
+      "tier": "workhorse",
+      "isBenchmark": false,
+      "verifyEndpoint": "/models",
+      "verifyMethod": "GET"
+    },
+    {
+      "id": "claude-opus-4-6",
+      "provider": "anthropic",
+      "displayName": "Claude Opus 4.6",
+      "strengths": ["writing", "analysis", "nuance", "reasoning", "coding"],
+      "contextWindow": 200000,
+      "costPer1kInput": 0.005,
+      "costPer1kOutput": 0.025,
+      "tier": "premium",
+      "isBenchmark": true,
+      "verifyEndpoint": "/messages",
+      "verifyMethod": "POST"
+    }
+  ],
+  "safeFallbacks": [
+    "gemini-2.0-flash",
+    "deepseek-chat",
+    "claude-sonnet-4-20250514"
+  ]
+}
