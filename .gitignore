@@ -5,12 +5,9 @@
 *.swp
 .DS_Store
 .atom/
-.build/
 .buildlog/
 .history
 .svn/
-.swiftpm/
-migrate_working_dir/
 
 # IntelliJ related
 *.iml
@@ -27,19 +24,32 @@ migrate_working_dir/
 **/doc/api/
 **/ios/Flutter/.last_build_id
 .dart_tool/
+.flutter-plugins
 .flutter-plugins-dependencies
 .pub-cache/
 .pub/
 /build/
-/coverage/
+
+# Web related
+lib/generated_plugin_registrant.dart
 
 # Symbolication related
 app.*.symbols
 
-# Obfuscation related
-app.*.map.json
+# Obfuscation
+*.dart.js.map
 
-# Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
+# --- BRILUXFORGE CUSTOM EXCLUSIONS ---
+# Generated files (Riverpod / Freezed)
+*.g.dart
+*.freezed.dart
+
+# Firebase Config
+lib/firebase_options.dart
+
+# Obfuscation Maps
+build/debug-info/
+
+# Local DBs/Logs (just in case they end up in the project root)
+*.sqlite
+briluxforge_debug.log
