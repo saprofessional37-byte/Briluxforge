@@ -13,6 +13,7 @@ import 'package:briluxforge/features/chat/data/models/conversation_search_result
 import 'package:briluxforge/features/chat/providers/active_conversation_provider.dart';
 import 'package:briluxforge/features/chat/providers/chat_provider.dart';
 import 'package:briluxforge/features/savings/presentation/widgets/savings_tracker_widget.dart';
+import 'package:briluxforge/features/updater/presentation/update_ready_banner.dart';
 
 // ── Profile menu action enum ──────────────────────────────────────────────────
 
@@ -645,8 +646,17 @@ class _SidebarFooter extends ConsumerWidget {
       padding: const EdgeInsets.all(12),
       child: Column(
         children: [
+          // ── Update banner (Phase 11 §8.1) ────────────────────────────────
+          // Collapses to zero height when idle; slides in as a 44 px row
+          // when a download is in progress or an update is ready to install.
+          // Positioned immediately above SavingsTrackerWidget per spec §8.1.
+          const UpdateReadyBanner(),
+
+          // ── Savings tracker ───────────────────────────────────────────────
           const SavingsTrackerWidget(),
           const SizedBox(height: 8),
+
+          // ── Icon tray + profile avatar ────────────────────────────────────
           Row(
             children: [
               Builder(

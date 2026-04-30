@@ -14,6 +14,7 @@ import 'package:briluxforge/features/licensing/providers/license_provider.dart';
 import 'package:briluxforge/features/onboarding/presentation/onboarding_screen.dart';
 import 'package:briluxforge/features/onboarding/providers/onboarding_provider.dart';
 import 'package:briluxforge/features/settings/providers/settings_provider.dart';
+import 'package:briluxforge/features/updater/presentation/forced_update_screen.dart';
 
 final _navigatorKey = GlobalKey<NavigatorState>();
 
@@ -49,7 +50,7 @@ class App extends ConsumerWidget {
       onGenerateTitle: (_) => conversationTitle != null
           ? 'Briluxforge — $conversationTitle'
           : 'Briluxforge',
-      home: const _AuthGate(),
+      home: const UpdateGate(child: _AuthGate()),
       onGenerateRoute: onGenerateRoute,
     );
   }

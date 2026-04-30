@@ -15,7 +15,8 @@ import 'package:briluxforge/features/delegation/data/engine/worthiness_evaluator
 import 'package:briluxforge/features/delegation/data/models/delegation_result.dart';
 import 'package:briluxforge/features/delegation/data/models/model_profile.dart';
 import 'package:briluxforge/features/delegation/data/models/task_plan.dart';
-import 'package:briluxforge/features/delegation/providers/model_profiles_provider.dart';
+import 'package:briluxforge/features/updater/providers/kill_switches_provider.dart';
+import 'package:briluxforge/features/updater/providers/updater_provider.dart';
 import 'package:briluxforge/features/delegation/providers/task_plan_provider.dart';
 import 'package:briluxforge/features/settings/providers/settings_provider.dart';
 import 'package:briluxforge/services/secure_storage_service.dart';
@@ -53,7 +54,12 @@ List<String> connectedProviders(Ref ref) {
 @riverpod
 class DelegationNotifier extends _$DelegationNotifier {
   @override
-  DelegationResult? build() => null;
+  DelegationResult? build() {
+    // Invalidate whenever kill-switches change so stale routing results are
+    // discarded and the next delegate call uses fresh data (Phase 11.8 §5.2).
+    ref.watch(killSwitchesProvider);
+    return null;
+  }
 
   // ── Layer 1 (with multi-API pre-stage) ────────────────────────────────────
 
@@ -65,13 +71,16 @@ class DelegationNotifier extends _$DelegationNotifier {
   /// [DelegationResult.precomputedResponse] set — the chat provider skips its
   /// live API call and uses the precomputed content directly.
   Future<DelegationResult?> tryLayer1(String prompt) async {
-    final profiles = ref.read(modelProfilesProvider).valueOrNull;
+    final profiles = ref.read(liveModelProfilesProvider).valueOrNull;
     if (profiles == null) {
       AppLogger.w('DelegationNotifier',
           'Model profiles not yet loaded — cannot run Layer 1.');
       return null;
     }
     final connected = ref.read(connectedProvidersProvider);
+    final disabledModelIds =
+        ref.read(killSwitchesProvider).valueOrNull?.disabledModelIds ??
+            const [];
 
     // ── Multi-API pre-stage ──────────────────────────────────────────────────
     final totalTokens = _contextAnalyzer.estimateTokens(prompt);
@@ -129,6 +138,7 @@ class DelegationNotifier extends _$DelegationNotifier {
       prompt: prompt,
       availableModels: profiles.routeableModels,
       connectedProviders: connected,
+      disabledModelIds: disabledModelIds,
     );
 
     if (result != null) state = result;
@@ -138,7 +148,7 @@ class DelegationNotifier extends _$DelegationNotifier {
   // ── Layer 3 — user chose "Use Default" ────────────────────────────────────
 
   Future<DelegationResult> resolveDefault(String prompt) async {
-    final profiles = ref.read(modelProfilesProvider).valueOrNull!;
+    final profiles = ref.read(liveModelProfilesProvider).valueOrNull!;
     final settings = await ref.read(settingsNotifierProvider.future);
     final connected = ref.read(connectedProvidersProvider);
 
@@ -160,7 +170,7 @@ class DelegationNotifier extends _$DelegationNotifier {
   // ── Layer 2 → Layer 3 — user chose "Let AI Decide" ────────────────────────
 
   Future<DelegationResult> resolveWithAI(String prompt) async {
-    final profiles = ref.read(modelProfilesProvider).valueOrNull!;
+    final profiles = ref.read(liveModelProfilesProvider).valueOrNull!;
     final settings = await ref.read(settingsNotifierProvider.future);
     final connected = ref.read(connectedProvidersProvider);
 

@@ -15,6 +15,7 @@ import 'package:briluxforge/features/licensing/data/models/license_model.dart';
 import 'package:briluxforge/features/licensing/providers/license_provider.dart';
 import 'package:briluxforge/features/onboarding/providers/onboarding_provider.dart';
 import 'package:briluxforge/features/settings/providers/settings_provider.dart';
+import 'package:briluxforge/features/updater/presentation/settings_updates_section.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -43,6 +44,8 @@ class SettingsScreen extends ConsumerWidget {
                     const _UseCaseSection(),
                     const SizedBox(height: 4),
                     const _AppearanceSection(),
+                    const SizedBox(height: 4),
+                    const SettingsUpdatesSection(),
                     const SizedBox(height: 4),
                     const _FeaturesSection(),
                     const SizedBox(height: 4),
@@ -965,7 +968,7 @@ class _HelpSection extends StatelessWidget {
   const _HelpSection();
 
   // Placeholder URL — replace with actual tutorial URL when available.
-  static const String _tutorialUrlPlaceholder = 'https://briluxforge.app/tutorials';
+  static const String _tutorialUrlPlaceholder = 'https://briluxlabs.com/tutorials';
 
   @override
   Widget build(BuildContext context) {
@@ -1024,7 +1027,7 @@ class _HelpSection extends StatelessWidget {
           ),
           _SectionRow(
             isLast: true,
-            onTap: () => _openUrl('https://briluxforge.app/docs'),
+            onTap: () => _openUrl('https://briluxlabs.com/docs'),
             child: Row(
               children: [
                 Container(

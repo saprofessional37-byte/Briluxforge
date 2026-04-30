@@ -2,13 +2,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:briluxforge/core/errors/app_exception.dart';
+import 'package:briluxforge/core/errors/error_translator.dart';
 import 'package:briluxforge/core/theme/app_colors.dart';
+import 'package:briluxforge/core/theme/app_tokens.dart';
+import 'package:briluxforge/core/widgets/app_button.dart';
+import 'package:briluxforge/core/widgets/app_card.dart';
+import 'package:briluxforge/core/widgets/app_dialog.dart';
+import 'package:briluxforge/core/widgets/app_error_display.dart';
 import 'package:briluxforge/features/api_keys/data/models/api_key_model.dart';
 import 'package:briluxforge/features/api_keys/presentation/widgets/key_status_indicator.dart';
 import 'package:briluxforge/features/api_keys/providers/api_key_provider.dart';
 
 /// Full management card for a single connected API key.
-/// Shows status, verify / remove actions, and an expandable screenshot guide.
 class ApiKeyCard extends ConsumerStatefulWidget {
   const ApiKeyCard({required this.model, super.key});
 
@@ -20,102 +26,85 @@ class ApiKeyCard extends ConsumerStatefulWidget {
 
 class _ApiKeyCardState extends ConsumerState<ApiKeyCard> {
   bool _guideExpanded = false;
-  String? _errorMessage;
+  _VerifyError? _verifyError;
 
   ProviderConfig get _config =>
       kSupportedProviders.firstWhere((p) => p.id == widget.model.provider);
 
   @override
   Widget build(BuildContext context) {
-    final borderColor = _resolveBorderColor();
-
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceElevatedDark,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: borderColor, width: 1.5),
-      ),
-      child: Column(
-        children: [
-          _CardBody(
-            model: widget.model,
-            config: _config,
-            errorMessage: _errorMessage,
-            guideExpanded: _guideExpanded,
-            onVerify: _handleVerify,
-            onRemove: _handleRemove,
-            onToggleGuide: () =>
-                setState(() => _guideExpanded = !_guideExpanded),
-          ),
-          if (_guideExpanded)
-            _ScreenshotWalkthrough(config: _config),
-        ],
+    return AppCard(
+      color: _borderColor.withValues(alpha: 0.04),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: AppRadii.borderMd,
+          border: Border.all(color: _borderColor, width: 1.5),
+        ),
+        child: Column(
+          children: [
+            _CardBody(
+              model: widget.model,
+              config: _config,
+              verifyError: _verifyError,
+              guideExpanded: _guideExpanded,
+              onVerify: _handleVerify,
+              onRemove: _handleRemove,
+              onToggleGuide: () =>
+                  setState(() => _guideExpanded = !_guideExpanded),
+              onDismissError: () => setState(() => _verifyError = null),
+            ),
+            if (_guideExpanded) _ScreenshotWalkthrough(config: _config),
+          ],
+        ),
       ),
     );
   }
 
-  Color _resolveBorderColor() {
-    if (_errorMessage != null) {
-      return AppColors.error.withValues(alpha: 0.4);
+  Color get _borderColor {
+    if (_verifyError != null) {
+      return AppColors.statusErrorBorder;
     }
     return switch (widget.model.status) {
-      VerificationStatus.verified => AppColors.success.withValues(alpha: 0.3),
-      VerificationStatus.failed => AppColors.error.withValues(alpha: 0.3),
-      VerificationStatus.verifying => AppColors.info.withValues(alpha: 0.3),
-      VerificationStatus.unverified => AppColors.borderDark,
+      VerificationStatus.verified => AppColors.statusSuccessBorder,
+      VerificationStatus.failed   => AppColors.statusErrorBorder,
+      VerificationStatus.verifying => AppColors.statusInfoBorder,
+      VerificationStatus.unverified => AppColors.borderSubtle,
     };
   }
 
   Future<void> _handleVerify() async {
-    setState(() => _errorMessage = null);
+    setState(() => _verifyError = null);
     try {
       await ref
           .read(apiKeyNotifierProvider.notifier)
           .verifyKey(widget.model.provider);
+    } on AppException catch (e) {
+      if (mounted) {
+        setState(() => _verifyError = _VerifyError(exception: e));
+      }
     } catch (e) {
       if (mounted) {
-        setState(() {
-          _errorMessage =
-              e.toString().replaceFirst(RegExp(r'^Exception:\s*'), '');
-        });
+        setState(() => _verifyError = _VerifyError(raw: e.toString()));
       }
     }
   }
 
   Future<void> _handleRemove() async {
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showAppDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.surfaceElevatedDark,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        title: Text(
-          'Remove ${_config.displayName}?',
-          style: Theme.of(ctx).textTheme.bodyLarge?.copyWith(
-                color: AppColors.textPrimaryDark,
-                fontWeight: FontWeight.w600,
-              ),
-        ),
-        content: Text(
-          'This permanently deletes the key from secure storage. '
-          'You will need to re-enter it to use ${_config.displayName} again.',
-          style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
-                color: AppColors.textSecondaryDark,
-                height: 1.5,
-              ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: FilledButton.styleFrom(backgroundColor: AppColors.error),
-            child: const Text('Remove'),
-          ),
-        ],
+      title: 'Remove ${_config.displayName}?',
+      body: Text(
+        'This permanently deletes the key from secure storage. '
+        'You will need to re-enter it to use ${_config.displayName} again.',
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppColors.textSecondaryDark,
+              height: 1.5,
+            ),
       ),
+      primaryLabel: 'Remove',
+      onPrimary: () => Navigator.pop(context, true),
+      secondaryLabel: 'Cancel',
+      onSecondary: () => Navigator.pop(context, false),
     );
 
     if (confirmed == true && mounted) {
@@ -126,6 +115,14 @@ class _ApiKeyCardState extends ConsumerState<ApiKeyCard> {
   }
 }
 
+/// Holds the last verification error.
+class _VerifyError {
+  const _VerifyError({this.exception, this.raw});
+
+  final AppException? exception;
+  final String? raw;
+}
+
 // ──────────────────────────────────────────────────────────
 // Card body
 // ──────────────────────────────────────────────────────────
@@ -134,25 +131,27 @@ class _CardBody extends StatelessWidget {
   const _CardBody({
     required this.model,
     required this.config,
-    required this.errorMessage,
+    required this.verifyError,
     required this.guideExpanded,
     required this.onVerify,
     required this.onRemove,
     required this.onToggleGuide,
+    required this.onDismissError,
   });
 
   final ApiKeyModel model;
   final ProviderConfig config;
-  final String? errorMessage;
+  final _VerifyError? verifyError;
   final bool guideExpanded;
   final VoidCallback onVerify;
   final VoidCallback onRemove;
   final VoidCallback onToggleGuide;
+  final VoidCallback onDismissError;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(AppSpacing.lg + 2),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -160,7 +159,7 @@ class _CardBody extends StatelessWidget {
           Row(
             children: [
               _ProviderIcon(config: config),
-              const SizedBox(width: 14),
+              const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -172,7 +171,7 @@ class _CardBody extends StatelessWidget {
                             fontWeight: FontWeight.w600,
                           ),
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: AppSpacing.xxs),
                     Text(
                       config.description,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -182,7 +181,7 @@ class _CardBody extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.md),
               KeyStatusIndicator(status: model.status),
             ],
           ),
@@ -190,7 +189,7 @@ class _CardBody extends StatelessWidget {
           // Last verified timestamp
           if (model.status == VerificationStatus.verified &&
               model.lastVerifiedAt != null) ...[
-            const SizedBox(height: 10),
+            const SizedBox(height: AppSpacing.sm),
             Text(
               'Verified ${_relativeTime(model.lastVerifiedAt!)}',
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
@@ -199,50 +198,61 @@ class _CardBody extends StatelessWidget {
             ),
           ],
 
-          // Error feedback
-          if (errorMessage != null) ...[
-            const SizedBox(height: 12),
-            _ErrorBanner(message: errorMessage!),
+          // Error display
+          if (verifyError != null) ...[
+            const SizedBox(height: AppSpacing.md),
+            if (verifyError!.exception != null)
+              AppErrorDisplay(
+                error: ErrorTranslator.translate(
+                  verifyError!.exception!,
+                  onAction: onDismissError,
+                  actionLabel: 'Dismiss',
+                ),
+              )
+            else
+              AppErrorDisplay(
+                error: ErrorTranslator.translate(
+                  ApiRequestException(
+                    provider: config.displayName,
+                    message: verifyError!.raw ?? 'Verification failed.',
+                  ),
+                  onAction: onDismissError,
+                  actionLabel: 'Dismiss',
+                ),
+              ),
           ],
 
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
 
           // Action row
           Row(
             children: [
-              _ActionButton(
-                icon: Icons.refresh_rounded,
+              AppButton(
                 label: 'Verify',
+                leadingIcon: Icons.refresh_rounded,
+                variant: AppButtonVariant.secondary,
+                size: AppButtonSize.compact,
                 onPressed: model.status == VerificationStatus.verifying
                     ? null
                     : onVerify,
-                color: AppColors.textSecondaryDark,
-                borderColor: AppColors.borderDark,
               ),
-              const SizedBox(width: 8),
-              _ActionButton(
-                icon: Icons.delete_outline_rounded,
+              const SizedBox(width: AppSpacing.sm),
+              AppButton(
                 label: 'Remove',
+                leadingIcon: Icons.delete_outline_rounded,
+                variant: AppButtonVariant.secondary,
+                size: AppButtonSize.compact,
                 onPressed: onRemove,
-                color: AppColors.error,
-                borderColor: AppColors.error.withValues(alpha: 0.3),
               ),
               const Spacer(),
-              TextButton.icon(
+              AppButton(
+                label: guideExpanded ? 'Hide guide' : 'How to get key',
+                leadingIcon: guideExpanded
+                    ? Icons.keyboard_arrow_up_rounded
+                    : Icons.help_outline_rounded,
+                variant: AppButtonVariant.ghost,
+                size: AppButtonSize.compact,
                 onPressed: onToggleGuide,
-                icon: Icon(
-                  guideExpanded
-                      ? Icons.keyboard_arrow_up_rounded
-                      : Icons.help_outline_rounded,
-                  size: 14,
-                ),
-                label: Text(guideExpanded ? 'Hide guide' : 'How to get key'),
-                style: TextButton.styleFrom(
-                  foregroundColor: AppColors.textTertiaryDark,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                  textStyle: const TextStyle(fontSize: 12),
-                ),
               ),
             ],
           ),
@@ -261,7 +271,7 @@ class _CardBody extends StatelessWidget {
 }
 
 // ──────────────────────────────────────────────────────────
-// Screenshot walkthrough (expandable)
+// Screenshot walkthrough
 // ──────────────────────────────────────────────────────────
 
 class _ScreenshotWalkthrough extends StatelessWidget {
@@ -274,9 +284,14 @@ class _ScreenshotWalkthrough extends StatelessWidget {
     final host = config.signupUrl.replaceFirst('https://', '');
     return Container(
       decoration: const BoxDecoration(
-        border: Border(top: BorderSide(color: AppColors.borderDark)),
+        border: Border(top: BorderSide(color: AppColors.borderSubtle)),
       ),
-      padding: const EdgeInsets.fromLTRB(18, 18, 18, 20),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg + 2,
+        AppSpacing.lg + 2,
+        AppSpacing.lg + 2,
+        AppSpacing.xl,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -287,29 +302,27 @@ class _ScreenshotWalkthrough extends StatelessWidget {
                   fontWeight: FontWeight.w600,
                 ),
           ),
-          const SizedBox(height: 16),
-          _Step(
-            number: 1,
-            text: 'Go to $host and create a free account.',
-          ),
-          const SizedBox(height: 10),
+          const SizedBox(height: AppSpacing.lg),
+          _Step(number: 1, text: 'Go to $host and create a free account.'),
+          const SizedBox(height: AppSpacing.sm),
           const _ImagePlaceholder(label: 'Screenshot: sign-up page'),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
           const _Step(
             number: 2,
-            text: 'Navigate to the API Keys section in your account dashboard.',
+            text:
+                'Navigate to the API Keys section in your account dashboard.',
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: AppSpacing.sm),
           const _ImagePlaceholder(label: 'Screenshot: dashboard → API Keys'),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
           const _Step(
             number: 3,
             text:
-                "Click \"Create new key\" (or equivalent). Copy the key — it's shown only once.",
+                'Click "Create new key" (or equivalent). Copy the key — it\'s shown only once.',
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: AppSpacing.sm),
           const _ImagePlaceholder(label: 'Screenshot: key creation dialog'),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
           const _Step(
             number: 4,
             text: 'Paste the key in the field above and click Add & Verify.',
@@ -321,7 +334,7 @@ class _ScreenshotWalkthrough extends StatelessWidget {
 }
 
 // ──────────────────────────────────────────────────────────
-// Small shared widgets
+// Shared small widgets
 // ──────────────────────────────────────────────────────────
 
 class _ProviderIcon extends StatelessWidget {
@@ -336,75 +349,9 @@ class _ProviderIcon extends StatelessWidget {
       height: 44,
       decoration: BoxDecoration(
         color: config.color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: AppRadii.borderMd,
       ),
       child: Icon(config.iconData, color: config.color, size: 22),
-    );
-  }
-}
-
-class _ActionButton extends StatelessWidget {
-  const _ActionButton({
-    required this.icon,
-    required this.label,
-    required this.onPressed,
-    required this.color,
-    required this.borderColor,
-  });
-
-  final IconData icon;
-  final String label;
-  final VoidCallback? onPressed;
-  final Color color;
-  final Color borderColor;
-
-  @override
-  Widget build(BuildContext context) {
-    return OutlinedButton.icon(
-      onPressed: onPressed,
-      icon: Icon(icon, size: 14),
-      label: Text(label),
-      style: OutlinedButton.styleFrom(
-        foregroundColor: color,
-        side: BorderSide(color: borderColor),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        textStyle: const TextStyle(fontSize: 13),
-      ),
-    );
-  }
-}
-
-class _ErrorBanner extends StatelessWidget {
-  const _ErrorBanner({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.error.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.error.withValues(alpha: 0.2)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Icon(Icons.error_outline_rounded,
-              size: 14, color: AppColors.error),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              message,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.error,
-                    height: 1.5,
-                  ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
@@ -424,7 +371,7 @@ class _Step extends StatelessWidget {
           width: 22,
           height: 22,
           decoration: const BoxDecoration(
-            color: AppColors.borderDark,
+            color: AppColors.borderSubtle,
             shape: BoxShape.circle,
           ),
           child: Center(
@@ -438,7 +385,7 @@ class _Step extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: AppSpacing.sm),
         Expanded(
           child: Text(
             text,
@@ -464,16 +411,16 @@ class _ImagePlaceholder extends StatelessWidget {
       width: double.infinity,
       height: 180,
       decoration: BoxDecoration(
-        color: AppColors.backgroundDark,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.borderDark),
+        color: AppColors.surfaceBase,
+        borderRadius: AppRadii.borderSm,
+        border: Border.all(color: AppColors.borderSubtle),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Icon(Icons.image_outlined,
               size: 30, color: AppColors.textTertiaryDark),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           Text(
             label,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(

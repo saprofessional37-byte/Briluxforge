@@ -1,0 +1,39 @@
+{
+  "manifest_version": 1,
+  "published_at": "2026-04-21T14:00:00Z",
+  "binary": {
+    "version": "1.2.3",
+    "minimum_version": "1.0.0",
+    "blocklist": [],
+    "release_notes_markdown": "## 1.2.3\n\n- Faster chat scrolling\n- New Groq provider support\n- Security patch for manifest parser",
+    "release_notes_url": "https://updates.briluxlabs.com/notes/1.2.3",
+    "artifacts": [
+      {
+        "platform": "windows",
+        "arch": "x64",
+        "url": "https://github.com/briluxforge/releases/download/v1.2.3/Briluxforge-1.2.3-windows-x64.zip",
+        "size_bytes": 48234912,
+        "sha256": "7f9b8c2a1e4d5e6f7890abcdef1234567890abcdef1234567890abcdef123456",
+        "ed25519_signature": "PLACEHOLDER_BASE64_64_BYTES"
+      }
+    ]
+  },
+  "brain": {
+    "version": 47,
+    "url": "https://updates.briluxlabs.com/brain/v47/brain.json",
+    "size_bytes": 18432,
+    "sha256": "9e3f12abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234",
+    "ed25519_signature": "PLACEHOLDER_BASE64_64_BYTES"
+  },
+  "feature_flags": {
+    "enable_groq_provider": true,
+    "enable_gemini_2_5_pro": true,
+    "disable_anthropic_streaming": false,
+    "show_savings_tracker": true
+  },
+  "kill_switches": {
+    "disabled_model_ids": [],
+    "disabled_providers": [],
+    "disabled_skill_ids": []
+  }
+}

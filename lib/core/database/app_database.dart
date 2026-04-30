@@ -16,12 +16,27 @@ export 'package:briluxforge/features/skills/data/tables/skills_table.dart';
 
 part 'app_database.g.dart';
 
-@DriftDatabase(tables: [Conversations, Messages, Skills])
+/// Drift table that mirrors the on-disk `pending/metadata.json` for the
+/// staged binary update (§6.5). Written by [UpdaterService]; queried on
+/// every bootstrap to cross-check the filesystem without a directory walk.
+///
+/// At most one row exists at any time — the primary key is `version`.
+class PendingUpdates extends Table {
+  TextColumn get version => text()();
+  DateTimeColumn get stagedAt => dateTime()();
+  TextColumn get sha256 => text()();
+  TextColumn get payloadPath => text()();
+
+  @override
+  Set<Column> get primaryKey => {version};
+}
+
+@DriftDatabase(tables: [Conversations, Messages, Skills, PendingUpdates])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -35,6 +50,9 @@ class AppDatabase extends _$AppDatabase {
           }
           if (from < 3) {
             await m.createTable(skills);
+          }
+          if (from < 4) {
+            await m.createTable(pendingUpdates);
           }
         },
       );

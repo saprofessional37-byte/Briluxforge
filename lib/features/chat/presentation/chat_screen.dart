@@ -2,7 +2,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:briluxforge/core/widgets/error_details_card.dart';
+import 'package:briluxforge/core/errors/user_facing_error.dart';
+import 'package:briluxforge/core/widgets/app_error_display.dart';
+import 'package:briluxforge/core/widgets/app_status_card.dart';
 import 'package:briluxforge/features/chat/presentation/widgets/chat_input_bar.dart';
 import 'package:briluxforge/features/chat/presentation/widgets/message_bubble.dart';
 import 'package:briluxforge/core/theme/app_colors.dart';
@@ -222,8 +224,6 @@ class _EmptyConversationHint extends StatelessWidget {
 }
 
 // ── Chat error banner ────────────────────────────────────────────────────────
-// Wraps [ErrorDetailsCard] with the margin/insets appropriate for the chat
-// layout (sits above the input bar, inside the Column).
 
 class _ChatErrorBanner extends StatelessWidget {
   const _ChatErrorBanner({
@@ -238,10 +238,14 @@ class _ChatErrorBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-      child: ErrorDetailsCard(
-        message: message,
-        technicalDetail: technicalDetail,
-        compact: true,
+      child: AppErrorDisplay(
+        error: UserFacingError(
+          headline: 'Message failed to send',
+          explanation: message,
+          actionLabel: 'Retry',
+          severity: AppStatusVariant.error,
+          technicalDetails: technicalDetail,
+        ),
       ),
     );
   }

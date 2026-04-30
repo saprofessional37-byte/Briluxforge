@@ -21,7 +21,7 @@ abstract final class AppConstants {
   static const int apiTriageMaxPromptChars = 500;
 
   static const String gumroadVerifyUrl = 'https://api.gumroad.com/v2/licenses/verify';
-  static const String gumroadCheckoutUrl = 'https://briluxforge.app/buy';
+  static const String gumroadCheckoutUrl = 'https://briluxlabs.com/buy';
 
   static const double subscriptionMonthlyEquivalent = 20.0;
 }

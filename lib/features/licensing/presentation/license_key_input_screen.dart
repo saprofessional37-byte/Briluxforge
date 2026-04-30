@@ -252,7 +252,7 @@ class _LicenseKeyInputScreenState extends ConsumerState<LicenseKeyInputScreen> {
                             ),
                         children: [
                           TextSpan(
-                            text: 'Purchase at briluxforge.app/buy →',
+                            text: 'Purchase at briluxlabs.com/buy →',
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                   color: AppColors.primary,
                                   fontWeight: FontWeight.w600,

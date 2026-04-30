@@ -2,6 +2,8 @@
 import 'package:flutter/material.dart';
 
 abstract final class AppColors {
+  // ── Raw palette (kept for legacy references during migration) ─────────────
+
   // Brand
   static const Color primary = Color(0xFF6C63FF);
   static const Color primaryDim = Color(0xFF4B44CC);
@@ -35,7 +37,7 @@ abstract final class AppColors {
   static const Color textTertiaryLight = Color(0xFF9A9AB0);
   static const Color textDisabledLight = Color(0xFFBBBBCC);
 
-  // Semantic
+  // Semantic raw hues (prefer role tokens for status UI)
   static const Color success = Color(0xFF22C55E);
   static const Color warning = Color(0xFFF59E0B);
   static const Color error = Color(0xFFEF4444);
@@ -53,15 +55,50 @@ abstract final class AppColors {
   static const Color savingsGreen = Color(0xFF00D4AA);
   static const Color savingsGreenDim = Color(0xFF00A882);
 
+  // ── Phase 12 — Semantic role tokens ──────────────────────────────────────
+
+  // Surface hierarchy
+  static const Color surfaceBase    = Color(0xFF0E0E10); // scaffold
+  static const Color surfaceRaised  = Color(0xFF17171A); // cards, panels
+  static const Color surfaceOverlay = Color(0xFF1E1E22); // dialogs, popovers
+
+  // Borders
+  static const Color borderSubtle = Color(0x0FFFFFFF); // white @ 6%
+  static const Color borderStrong = Color(0x24FFFFFF); // white @ 14%
+
+  // Text roles (dark theme semantic aliases; suffixed variants above for light)
+  static const Color textPrimary    = Color(0xEBF2F2F7); // white @ 92%
+  static const Color textSecondary  = Color(0xA3F2F2F7); // white @ 64%
+  static const Color textTertiary   = Color(0x61F2F2F7); // white @ 38%
+
+  // Brand roles
+  /// Brand colour at 85% saturation — accents, focus rings, active states.
+  static const Color brandPrimary      = Color(0xFF6660E0);
+
+  /// Muted brand for primary button fills — avoids neon-on-dark vibration.
+  static const Color brandPrimaryMuted = Color(0xFF4E49C8);
+
+  // Status triads — background / foreground / border
+  static const Color statusSuccessBg     = Color(0x1F22C55E); // 12% opacity
+  static const Color statusSuccessFg     = Color(0xFF4ADE80);
+  static const Color statusSuccessBorder = Color(0x3D22C55E); // 24% opacity
+
+  static const Color statusErrorBg     = Color(0x1FEF4444);
+  static const Color statusErrorFg     = Color(0xFFF87171);
+  static const Color statusErrorBorder = Color(0x3DEF4444);
+
+  static const Color statusWarnBg     = Color(0x1FF59E0B);
+  static const Color statusWarnFg     = Color(0xFFFBBF24);
+  static const Color statusWarnBorder = Color(0x3DF59E0B);
+
+  static const Color statusInfoBg     = Color(0x1F3B82F6);
+  static const Color statusInfoFg     = Color(0xFF60A5FA);
+  static const Color statusInfoBorder = Color(0x3D3B82F6);
+
   // ── Input field contrast helpers (WCAG AA/AAA verified) ──────────────────
   //
-  // Dark fill:  0xFF1E1E2A — lum ≈ 0.013 (very dark)
-  // Dark hint:  0xFF9898B0 — lum ≈ 0.34  → contrast ≈ 6.2:1 (AA ✓)
-  // Dark body:  textPrimaryDark (0xFFF2F2F7) — contrast ≈ 15:1 (AAA ✓)
-  //
-  // Light fill: 0xFFEAEAF5 — lum ≈ 0.84  (slightly darker than scaffold)
-  // Light hint: 0xFF5E5E78 — lum ≈ 0.126 → contrast ≈ 5.0:1 (AA ✓)
-  // Light body: textPrimaryLight (0xFF0F0F1A) — contrast ≈ 17:1 (AAA ✓)
+  // Dark fill:  0xFF1E1E2A — contrast ≈ 6.2:1 (AA ✓)
+  // Light fill: 0xFFEAEAF5 — contrast ≈ 5.0:1 (AA ✓)
 
   static Color inputFill(bool isDark) =>
       isDark ? const Color(0xFF1E1E2A) : const Color(0xFFEAEAF5);

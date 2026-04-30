@@ -2,10 +2,10 @@
 import 'package:flutter/material.dart';
 
 import 'package:briluxforge/core/theme/app_colors.dart';
+import 'package:briluxforge/core/theme/app_tokens.dart';
 import 'package:briluxforge/features/api_keys/data/models/api_key_model.dart';
 
-/// Pill-shaped status badge for an API key. Shown inside [ApiKeyCard] and
-/// the onboarding add-key panel.
+/// Pill-shaped status badge for an API key.
 class KeyStatusIndicator extends StatelessWidget {
   const KeyStatusIndicator({
     required this.status,
@@ -14,8 +14,6 @@ class KeyStatusIndicator extends StatelessWidget {
   });
 
   final VerificationStatus status;
-
-  /// When false, only the icon/spinner is shown (compact mode).
   final bool showLabel;
 
   @override
@@ -24,26 +22,34 @@ class KeyStatusIndicator extends StatelessWidget {
       VerificationStatus.verified => _Chip(
           icon: Icons.check_circle_outline_rounded,
           label: 'Connected',
-          color: AppColors.success,
+          fg: AppColors.statusSuccessFg,
+          bg: AppColors.statusSuccessBg,
+          border: AppColors.statusSuccessBorder,
           showLabel: showLabel,
         ),
       VerificationStatus.failed => _Chip(
           icon: Icons.error_outline_rounded,
           label: 'Failed',
-          color: AppColors.error,
+          fg: AppColors.statusErrorFg,
+          bg: AppColors.statusErrorBg,
+          border: AppColors.statusErrorBorder,
           showLabel: showLabel,
         ),
       VerificationStatus.verifying => _Chip(
           icon: null,
           label: 'Verifying…',
-          color: AppColors.info,
+          fg: AppColors.statusInfoFg,
+          bg: AppColors.statusInfoBg,
+          border: AppColors.statusInfoBorder,
           showLabel: showLabel,
           isLoading: true,
         ),
       VerificationStatus.unverified => _Chip(
           icon: Icons.radio_button_unchecked_rounded,
           label: 'Not verified',
-          color: AppColors.textTertiaryDark,
+          fg: AppColors.textTertiaryDark,
+          bg: Colors.transparent,
+          border: AppColors.borderSubtle,
           showLabel: showLabel,
         ),
     };
@@ -54,14 +60,18 @@ class _Chip extends StatelessWidget {
   const _Chip({
     required this.icon,
     required this.label,
-    required this.color,
+    required this.fg,
+    required this.bg,
+    required this.border,
     required this.showLabel,
     this.isLoading = false,
   });
 
   final IconData? icon;
   final String label;
-  final Color color;
+  final Color fg;
+  final Color bg;
+  final Color border;
   final bool showLabel;
   final bool isLoading;
 
@@ -69,13 +79,13 @@ class _Chip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.symmetric(
-        horizontal: showLabel ? 10 : 6,
-        vertical: 4,
+        horizontal: showLabel ? AppSpacing.sm + 2 : AppSpacing.xs,
+        vertical: AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: color.withValues(alpha: 0.25)),
+        color: bg,
+        borderRadius: AppRadii.borderXs,
+        border: Border.all(color: border),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -86,11 +96,11 @@ class _Chip extends StatelessWidget {
               height: 11,
               child: CircularProgressIndicator(
                 strokeWidth: 1.5,
-                valueColor: AlwaysStoppedAnimation<Color>(color),
+                valueColor: AlwaysStoppedAnimation<Color>(fg),
               ),
             )
           else if (icon != null)
-            Icon(icon, size: 12, color: color),
+            Icon(icon, size: 12, color: fg),
           if (showLabel) ...[
             const SizedBox(width: 5),
             Text(
@@ -98,7 +108,7 @@ class _Chip extends StatelessWidget {
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
-                color: color,
+                color: fg,
                 height: 1,
               ),
             ),

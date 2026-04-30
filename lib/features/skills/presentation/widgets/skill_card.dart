@@ -2,6 +2,9 @@
 import 'package:flutter/material.dart';
 
 import 'package:briluxforge/core/theme/app_colors.dart';
+import 'package:briluxforge/core/theme/app_tokens.dart';
+import 'package:briluxforge/core/widgets/app_card.dart';
+import 'package:briluxforge/core/widgets/app_toggle.dart';
 import 'package:briluxforge/features/skills/data/models/skill_model.dart';
 
 const _providerLabels = <String, String>{
@@ -30,33 +33,36 @@ class SkillCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isActive = skill.isEnabled;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surfaceDark,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isActive
-              ? AppColors.primary.withValues(alpha: 0.28)
-              : AppColors.borderDark,
-        ),
-      ),
-      child: InkWell(
-        onTap: onEdit,
-        borderRadius: BorderRadius.circular(12),
+    return AppCard(
+      onTap: onEdit,
+      color: isActive
+          ? AppColors.brandPrimary.withValues(alpha: 0.06)
+          : null,
+      child: Container(
+        decoration: isActive
+            ? BoxDecoration(
+                borderRadius: AppRadii.borderMd,
+                border: Border.all(
+                  color: AppColors.brandPrimary.withValues(alpha: 0.28),
+                ),
+              )
+            : null,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.md,
+            AppSpacing.md,
+            AppSpacing.sm,
+            AppSpacing.md,
+          ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _SkillIcon(isActive: isActive),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.md),
               Expanded(
-                child: _SkillContent(
-                  skill: skill,
-                  isActive: isActive,
-                ),
+                child: _SkillContent(skill: skill, isActive: isActive),
               ),
-              const SizedBox(width: 6),
+              const SizedBox(width: AppSpacing.xs),
               _SkillActions(
                 skill: skill,
                 onToggle: onToggle,
@@ -83,14 +89,15 @@ class _SkillIcon extends StatelessWidget {
       height: 36,
       decoration: BoxDecoration(
         color: isActive
-            ? AppColors.primary.withValues(alpha: 0.14)
-            : AppColors.surfaceElevatedDark,
-        borderRadius: BorderRadius.circular(9),
+            ? AppColors.brandPrimary.withValues(alpha: 0.14)
+            : AppColors.surfaceOverlay,
+        borderRadius: AppRadii.borderSm,
       ),
       child: Icon(
         Icons.psychology_outlined,
         size: 18,
-        color: isActive ? AppColors.primary : AppColors.textTertiaryDark,
+        color:
+            isActive ? AppColors.brandPrimary : AppColors.textTertiaryDark,
       ),
     );
   }
@@ -121,17 +128,17 @@ class _SkillContent extends StatelessWidget {
               ),
             ),
             if (skill.isBuiltIn) ...[
-              const SizedBox(width: 6),
+              const SizedBox(width: AppSpacing.xs),
               const _Chip(
                 label: 'Built-in',
                 color: AppColors.textTertiaryDark,
-                bg: AppColors.surfaceElevatedDark,
+                bg: AppColors.surfaceOverlay,
               ),
             ],
           ],
         ),
         if (skill.description.isNotEmpty) ...[
-          const SizedBox(height: 3),
+          const SizedBox(height: AppSpacing.xxs + 1),
           Text(
             skill.description,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -143,15 +150,15 @@ class _SkillContent extends StatelessWidget {
         ],
         if (skill.pinnedProviders != null &&
             skill.pinnedProviders!.isNotEmpty) ...[
-          const SizedBox(height: 6),
+          const SizedBox(height: AppSpacing.xs),
           Wrap(
-            spacing: 4,
-            runSpacing: 4,
+            spacing: AppSpacing.xs,
+            runSpacing: AppSpacing.xs,
             children: skill.pinnedProviders!
                 .map((p) => _Chip(
                       label: _providerLabels[p] ?? p,
-                      color: AppColors.primary,
-                      bg: AppColors.primary.withValues(alpha: 0.1),
+                      color: AppColors.brandPrimary,
+                      bg: AppColors.brandPrimary.withValues(alpha: 0.1),
                     ))
                 .toList(),
           ),
@@ -177,20 +184,16 @@ class _SkillActions extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Switch(
-          value: skill.isEnabled,
-          onChanged: onToggle,
-          activeThumbColor: AppColors.primary,
-          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        ),
+        AppToggle(value: skill.isEnabled, onChanged: onToggle),
         if (onDelete != null) ...[
-          const SizedBox(height: 2),
+          const SizedBox(height: AppSpacing.xxs),
           IconButton(
             icon: const Icon(Icons.delete_outline, size: 16),
             color: AppColors.textTertiaryDark,
             onPressed: onDelete,
-            padding: const EdgeInsets.all(4),
-            constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+            padding: const EdgeInsets.all(AppSpacing.xs),
+            constraints:
+                const BoxConstraints(minWidth: 28, minHeight: 28),
             tooltip: 'Delete skill',
           ),
         ],
@@ -209,10 +212,13 @@ class _Chip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.xs + 2,
+        vertical: AppSpacing.xxs,
+      ),
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: AppRadii.borderXs,
       ),
       child: Text(
         label,

@@ -23,15 +23,20 @@ class DelegationEngine {
   ///
   /// [availableModels] — the full list from model_profiles.json (may include benchmark).
   /// [connectedProviders] — provider IDs with verified API keys (e.g. ['deepseek', 'google']).
+  /// [disabledModelIds] — model IDs from the manifest kill-switches (§7.4, Phase 11.8).
   ///
   /// Returns null when no model can be chosen with sufficient confidence.
   DelegationResult? delegate({
     required String prompt,
     required List<ModelProfile> availableModels,
     required List<String> connectedProviders,
+    List<String> disabledModelIds = const [],
   }) {
     final connected = availableModels
-        .where((m) => !m.isBenchmark && connectedProviders.contains(m.provider))
+        .where((m) =>
+            !m.isBenchmark &&
+            connectedProviders.contains(m.provider) &&
+            !disabledModelIds.contains(m.id))
         .toList();
 
     if (connected.isEmpty) {

@@ -1,5 +1,10 @@
 // lib/core/errors/app_exception.dart
 
+// Phase 11 OTA exception subclasses live in a part file so they can extend
+// this sealed class while staying co-located with the updater feature.
+// See lib/features/updater/data/updater_exceptions.dart and §14.3.
+part '../../features/updater/data/updater_exceptions.dart';
+
 sealed class AppException implements Exception {
   const AppException({
     required this.message,

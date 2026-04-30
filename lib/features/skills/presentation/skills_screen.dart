@@ -4,6 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:briluxforge/core/routing/app_router.dart';
 import 'package:briluxforge/core/theme/app_colors.dart';
+import 'package:briluxforge/core/theme/app_tokens.dart';
+import 'package:briluxforge/core/widgets/app_button.dart';
+import 'package:briluxforge/core/widgets/app_card.dart';
+import 'package:briluxforge/core/widgets/app_dialog.dart';
 import 'package:briluxforge/features/skills/data/models/skill_model.dart';
 import 'package:briluxforge/features/skills/presentation/skill_editor_screen.dart';
 import 'package:briluxforge/features/skills/presentation/widgets/skill_card.dart';
@@ -17,9 +21,9 @@ class SkillsScreen extends ConsumerWidget {
     final allSkillsAsync = ref.watch(allSkillsProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundDark,
+      backgroundColor: AppColors.surfaceBase,
       appBar: AppBar(
-        backgroundColor: AppColors.surfaceDark,
+        backgroundColor: AppColors.surfaceBase,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
           icon: const Icon(
@@ -38,34 +42,24 @@ class SkillsScreen extends ConsumerWidget {
         ),
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: FilledButton.icon(
-              onPressed: () => Navigator.pushNamed(
-                context,
-                AppRoutes.skillEditor,
-              ),
-              icon: const Icon(Icons.add, size: 16),
-              label: const Text('New Skill'),
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                textStyle:
-                    const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
-              ),
+            padding: const EdgeInsets.only(right: AppSpacing.md),
+            child: AppButton(
+              label: 'New Skill',
+              leadingIcon: Icons.add,
+              onPressed: () =>
+                  Navigator.pushNamed(context, AppRoutes.skillEditor),
             ),
           ),
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: AppColors.borderDark),
+          child: Container(height: 1, color: AppColors.borderSubtle),
         ),
       ),
       body: allSkillsAsync.when(
         loading: () => const Center(
           child: CircularProgressIndicator(
-            color: AppColors.primary,
+            color: AppColors.brandPrimary,
             strokeWidth: 2,
           ),
         ),
@@ -90,9 +84,9 @@ class _ErrorState extends StatelessWidget {
           const Icon(
             Icons.error_outline,
             color: AppColors.textTertiaryDark,
-            size: 40,
+            size: 32,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           Text(
             'Could not load skills.',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -120,16 +114,19 @@ class _SkillsList extends ConsumerWidget {
     if (skills.isEmpty) return const _EmptyState();
 
     return ListView(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      padding: const EdgeInsets.symmetric(
+        vertical: AppSpacing.md,
+        horizontal: AppSpacing.lg,
+      ),
       children: [
         if (builtIns.isNotEmpty) ...[
           const _SectionHeader(
             title: 'Built-in Skills',
             subtitle: 'Shipped with Briluxforge — cannot be deleted.',
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           ...builtIns.map((skill) => Padding(
-                padding: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.only(bottom: AppSpacing.sm),
                 child: SkillCard(
                   skill: skill,
                   onToggle: (enabled) => ref
@@ -144,11 +141,11 @@ class _SkillsList extends ConsumerWidget {
               )),
         ],
         if (userSkills.isNotEmpty) ...[
-          SizedBox(height: builtIns.isNotEmpty ? 20 : 0),
+          SizedBox(height: builtIns.isNotEmpty ? AppSpacing.xl : 0),
           const _SectionHeader(title: 'My Skills'),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           ...userSkills.map((skill) => Padding(
-                padding: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.only(bottom: AppSpacing.sm),
                 child: SkillCard(
                   skill: skill,
                   onToggle: (enabled) => ref
@@ -174,36 +171,19 @@ class _SkillsList extends ConsumerWidget {
     WidgetRef ref,
     SkillModel skill,
   ) async {
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showAppDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.surfaceElevatedDark,
-        title: Text(
-          'Delete "${skill.name}"?',
-          style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
-                color: AppColors.textPrimaryDark,
-              ),
-        ),
-        content: Text(
-          'This skill will be permanently removed.',
-          style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondaryDark,
-              ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: FilledButton.styleFrom(
-              backgroundColor: AppColors.error,
+      title: 'Delete "${skill.name}"?',
+      body: Text(
+        'This skill will be permanently removed.',
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppColors.textSecondaryDark,
             ),
-            child: const Text('Delete'),
-          ),
-        ],
       ),
+      primaryLabel: 'Delete',
+      onPrimary: () => Navigator.pop(context, true),
+      secondaryLabel: 'Cancel',
+      onSecondary: () => Navigator.pop(context, false),
     );
     if (confirmed == true) {
       await ref
@@ -226,17 +206,17 @@ class _EmptyState extends StatelessWidget {
         children: [
           const Icon(
             Icons.psychology_outlined,
-            size: 48,
+            size: 32,
             color: AppColors.textTertiaryDark,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           Text(
             'No skills yet.',
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
                   color: AppColors.textSecondaryDark,
                 ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             'Create a skill to customise AI behaviour.',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -271,7 +251,7 @@ class _SectionHeader extends StatelessWidget {
               ),
         ),
         if (subtitle != null) ...[
-          const SizedBox(height: 2),
+          const SizedBox(height: AppSpacing.xxs),
           Text(
             subtitle!,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
@@ -284,7 +264,7 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-// ── Create hint (shown when user has no custom skills yet) ────────────────────
+// ── Create hint ───────────────────────────────────────────────────────────────
 
 class _CreateHint extends StatelessWidget {
   const _CreateHint();
@@ -292,25 +272,21 @@ class _CreateHint extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 20),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.surfaceElevatedDark,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.borderDark),
-        ),
+      padding: const EdgeInsets.only(top: AppSpacing.xl),
+      child: AppCard(
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Row(
           children: [
             const Icon(
               Icons.add_circle_outline,
               size: 18,
-              color: AppColors.primary,
+              color: AppColors.brandPrimary,
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Text(
-                'Create your own skills to give the AI a custom persona or expertise tailored to your workflows.',
+                'Create your own skills to give the AI a custom persona '
+                'or expertise tailored to your workflows.',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: AppColors.textSecondaryDark,
                     ),

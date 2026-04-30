@@ -1,8 +1,13 @@
 // lib/features/onboarding/presentation/onboarding_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:briluxforge/core/constants/app_constants.dart';
 import 'package:briluxforge/core/theme/app_colors.dart';
+import 'package:briluxforge/core/theme/app_tokens.dart';
+import 'package:briluxforge/core/widgets/app_button.dart';
+import 'package:briluxforge/core/widgets/app_status_card.dart';
+import 'package:briluxforge/core/widgets/app_success_graphic.dart';
 import 'package:briluxforge/features/api_keys/data/models/api_key_model.dart';
 import 'package:briluxforge/features/api_keys/providers/api_key_provider.dart';
 import 'package:briluxforge/features/onboarding/presentation/use_case_screen.dart';
@@ -46,13 +51,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   Future<void> _complete() async {
     await ref.read(onboardingNotifierProvider.notifier).completeOnboarding();
-    // AuthGate reactively routes to HomeScreen.
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundDark,
+      backgroundColor: AppColors.surfaceBase,
       body: Row(
         children: [
           _LeftPanel(currentPage: _currentPage),
@@ -69,7 +73,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   child: PageView(
                     controller: _pageController,
                     physics: const NeverScrollableScrollPhysics(),
-                    onPageChanged: (i) => setState(() => _currentPage = i),
+                    onPageChanged: (i) =>
+                        setState(() => _currentPage = i),
                     children: [
                       _WelcomePage(onNext: _next),
                       UseCaseScreen(onNext: _next),
@@ -96,7 +101,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 }
 
 // ──────────────────────────────────────────────────────────
-// Left panel — branding + step list
+// Left panel
 // ──────────────────────────────────────────────────────────
 
 class _LeftPanel extends StatelessWidget {
@@ -118,22 +123,21 @@ class _LeftPanel extends StatelessWidget {
       width: 300,
       decoration: const BoxDecoration(
         color: AppColors.sidebarDark,
-        border: Border(right: BorderSide(color: AppColors.borderDark)),
+        border: Border(right: BorderSide(color: AppColors.borderSubtle)),
       ),
-      padding: const EdgeInsets.all(40),
+      padding: const EdgeInsets.all(AppSpacing.xxl),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Logo
           Container(
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: AppColors.primary,
-              borderRadius: BorderRadius.circular(14),
+              color: AppColors.brandPrimaryMuted,
+              borderRadius: AppRadii.borderMd,
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.35),
+                  color: AppColors.brandPrimary.withValues(alpha: 0.35),
                   blurRadius: 20,
                   offset: const Offset(0, 6),
                 ),
@@ -141,7 +145,7 @@ class _LeftPanel extends StatelessWidget {
             ),
             child: const Icon(Icons.bolt, color: Colors.white, size: 26),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: AppSpacing.xl),
           Text(
             AppConstants.appName,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -149,24 +153,24 @@ class _LeftPanel extends StatelessWidget {
                   fontWeight: FontWeight.w700,
                 ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             'Setup',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: AppColors.textSecondaryDark,
                 ),
           ),
-          const SizedBox(height: 48),
-          // Steps
+          const SizedBox(height: AppSpacing.xxl + AppSpacing.lg),
           ...List.generate(_steps.length, (i) {
             final isDone = i < currentPage;
             final isCurrent = i == currentPage;
             return Padding(
-              padding: const EdgeInsets.only(bottom: 20),
+              padding: const EdgeInsets.only(bottom: AppSpacing.xl),
               child: Row(
                 children: [
-                  _StepDot(isDone: isDone, isCurrent: isCurrent, index: i),
-                  const SizedBox(width: 14),
+                  _StepDot(
+                      isDone: isDone, isCurrent: isCurrent, index: i),
+                  const SizedBox(width: AppSpacing.md),
                   Text(
                     _steps[i],
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -216,29 +220,29 @@ class _StepDot extends StatelessWidget {
       height: 24,
       decoration: BoxDecoration(
         color: isDone
-            ? AppColors.success.withValues(alpha: 0.15)
+            ? AppColors.statusSuccessBg
             : isCurrent
-                ? AppColors.primary.withValues(alpha: 0.15)
+                ? AppColors.brandPrimary.withValues(alpha: 0.15)
                 : Colors.transparent,
         shape: BoxShape.circle,
         border: Border.all(
           color: isDone
-              ? AppColors.success
+              ? AppColors.statusSuccessFg
               : isCurrent
-                  ? AppColors.primary
-                  : AppColors.borderDark,
+                  ? AppColors.brandPrimary
+                  : AppColors.borderSubtle,
           width: 1.5,
         ),
       ),
       child: isDone
-          ? const Icon(Icons.check, size: 12, color: AppColors.success)
+          ? Icon(Icons.check, size: 12, color: AppColors.statusSuccessFg)
           : isCurrent
               ? Center(
                   child: Container(
                     width: 8,
                     height: 8,
                     decoration: const BoxDecoration(
-                      color: AppColors.primary,
+                      color: AppColors.brandPrimary,
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -257,7 +261,7 @@ class _StepDot extends StatelessWidget {
 }
 
 // ──────────────────────────────────────────────────────────
-// Top bar — progress + skip
+// Top bar
 // ──────────────────────────────────────────────────────────
 
 class _TopBar extends StatelessWidget {
@@ -277,40 +281,31 @@ class _TopBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 52,
-      padding: const EdgeInsets.symmetric(horizontal: 40),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
       decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: AppColors.borderDark)),
+        border: Border(bottom: BorderSide(color: AppColors.borderSubtle)),
       ),
       child: Row(
         children: [
           Expanded(
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(4),
+              borderRadius: AppRadii.borderXs,
               child: LinearProgressIndicator(
                 value: (currentPage + 1) / totalPages,
-                backgroundColor: AppColors.surfaceElevatedDark,
-                valueColor:
-                    const AlwaysStoppedAnimation<Color>(AppColors.primary),
+                backgroundColor: AppColors.surfaceOverlay,
+                valueColor: const AlwaysStoppedAnimation<Color>(
+                    AppColors.brandPrimary),
                 minHeight: 3,
               ),
             ),
           ),
           if (showSkip) ...[
-            const SizedBox(width: 20),
-            TextButton(
+            const SizedBox(width: AppSpacing.xl),
+            AppButton(
+              label: 'Skip setup',
+              variant: AppButtonVariant.ghost,
+              size: AppButtonSize.compact,
               onPressed: onSkip,
-              style: TextButton.styleFrom(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: Text(
-                'Skip setup',
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: AppColors.textTertiaryDark,
-                    ),
-              ),
             ),
           ],
         ],
@@ -331,27 +326,29 @@ class _WelcomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(60, 64, 60, 48),
+      padding: const EdgeInsets.fromLTRB(
+          AppSpacing.xxl + 28, 64, AppSpacing.xxl + 28, AppSpacing.xxl),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.md, vertical: AppSpacing.xs),
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(50),
+              color: AppColors.brandPrimary.withValues(alpha: 0.1),
+              borderRadius: AppRadii.borderXs,
               border: Border.all(
-                  color: AppColors.primary.withValues(alpha: 0.3)),
+                  color: AppColors.brandPrimary.withValues(alpha: 0.3)),
             ),
             child: Text(
               'Welcome to Briluxforge',
               style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: AppColors.primary,
+                    color: AppColors.brandPrimary,
                     fontWeight: FontWeight.w600,
                   ),
             ),
           ),
-          const SizedBox(height: 28),
+          const SizedBox(height: AppSpacing.xl),
           Text(
             'The AI router that\npays for itself.',
             style: Theme.of(context).textTheme.displayMedium?.copyWith(
@@ -360,7 +357,7 @@ class _WelcomePage extends StatelessWidget {
                   height: 1.2,
                 ),
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: AppSpacing.lg + 2),
           Text(
             'Briluxforge routes every prompt to the right model automatically — '
             'DeepSeek for code, Gemini for long documents, Claude for nuanced writing. '
@@ -370,41 +367,38 @@ class _WelcomePage extends StatelessWidget {
                   height: 1.65,
                 ),
           ),
-          const SizedBox(height: 48),
+          const SizedBox(height: AppSpacing.xxl),
           const _HighlightRow(
             icon: Icons.auto_awesome_outlined,
-            color: AppColors.primary,
+            color: AppColors.brandPrimary,
             title: 'Automatic delegation',
-            subtitle: 'Picks the best model for every task — locally, in < 5ms.',
+            subtitle:
+                'Picks the best model for every task — locally, in < 5ms.',
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
           const _HighlightRow(
             icon: Icons.savings_outlined,
             color: AppColors.savingsGreen,
             title: 'Real-time savings tracker',
-            subtitle: 'Tracks exactly how much you save vs. a flagship subscription.',
+            subtitle:
+                'Tracks exactly how much you save vs. a flagship subscription.',
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
           const _HighlightRow(
             icon: Icons.psychology_outlined,
             color: Color(0xFFA78BFA),
             title: 'Skills system',
-            subtitle: 'Reusable system prompts that follow you across every conversation.',
+            subtitle:
+                'Reusable system prompts that follow you across every conversation.',
           ),
           const Spacer(),
           SizedBox(
             width: double.infinity,
-            height: 52,
-            child: FilledButton(
+            child: AppButton(
+              label: 'Get started',
+              leadingIcon: Icons.arrow_forward_rounded,
               onPressed: onNext,
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('Get started'),
-                  SizedBox(width: 8),
-                  Icon(Icons.arrow_forward_rounded, size: 18),
-                ],
-              ),
+              size: AppButtonSize.large,
             ),
           ),
         ],
@@ -436,11 +430,11 @@ class _HighlightRow extends StatelessWidget {
           height: 40,
           decoration: BoxDecoration(
             color: color.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: AppRadii.borderSm,
           ),
           child: Icon(icon, color: color, size: 20),
         ),
-        const SizedBox(width: 16),
+        const SizedBox(width: AppSpacing.lg),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -452,7 +446,7 @@ class _HighlightRow extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
               ),
-              const SizedBox(height: 2),
+              const SizedBox(height: AppSpacing.xxs),
               Text(
                 subtitle,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -486,7 +480,8 @@ class _ApiGuidePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(60, 48, 60, 40),
+      padding: const EdgeInsets.fromLTRB(
+          AppSpacing.xxl + 28, AppSpacing.xxl, AppSpacing.xxl + 28, AppSpacing.xl),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -498,15 +493,15 @@ class _ApiGuidePage extends StatelessWidget {
                   height: 1.2,
                 ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: AppSpacing.sm),
           Text(
-            'Start with these two. They cover 95% of tasks at the best price-per-token on the market.',
+            'Start with these two. They cover 95% of tasks at the best price-per-token.',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: AppColors.textSecondaryDark,
                   height: 1.5,
                 ),
           ),
-          const SizedBox(height: 28),
+          const SizedBox(height: AppSpacing.xl),
           const _ApiRecommendationCard(
             rank: 1,
             name: 'DeepSeek',
@@ -518,24 +513,25 @@ class _ApiGuidePage extends StatelessWidget {
             icon: Icons.code_rounded,
             iconColor: Color(0xFF60A5FA),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: AppSpacing.md),
           const _ApiRecommendationCard(
             rank: 2,
             name: 'Google Gemini',
             tagline: 'Best for long documents, research, and summarization',
             price: '\$0.04 / 1M input tokens',
             highlight: 'Cheapest',
-            highlightColor: AppColors.primary,
+            highlightColor: AppColors.brandPrimary,
             url: 'aistudio.google.com',
             icon: Icons.science_outlined,
             iconColor: Color(0xFF34D399),
           ),
-          const SizedBox(height: 14),
-          if (useCase == UseCaseType.writing)
+          if (useCase == UseCaseType.writing) ...[
+            const SizedBox(height: AppSpacing.md),
             const _ApiRecommendationCard(
               rank: 3,
               name: 'Anthropic Claude',
-              tagline: 'Best for nuanced writing, analysis, and instruction-following',
+              tagline:
+                  'Best for nuanced writing, analysis, and instruction-following',
               price: '\$3.00 / 1M input tokens',
               highlight: 'Recommended for writing',
               highlightColor: Color(0xFFA78BFA),
@@ -543,8 +539,10 @@ class _ApiGuidePage extends StatelessWidget {
               icon: Icons.edit_note_rounded,
               iconColor: Color(0xFFA78BFA),
             ),
+          ],
           const Spacer(),
-          _NavButtons(onBack: onBack, onNext: onNext, nextLabel: 'Continue'),
+          _NavButtons(
+              onBack: onBack, onNext: onNext, nextLabel: 'Continue'),
         ],
       ),
     );
@@ -577,11 +575,11 @@ class _ApiRecommendationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(AppSpacing.lg + 2),
       decoration: BoxDecoration(
-        color: AppColors.surfaceElevatedDark,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.borderDark),
+        color: AppColors.surfaceRaised,
+        borderRadius: AppRadii.borderMd,
+        border: Border.all(color: AppColors.borderSubtle),
       ),
       child: Row(
         children: [
@@ -590,11 +588,11 @@ class _ApiRecommendationCard extends StatelessWidget {
             height: 44,
             decoration: BoxDecoration(
               color: iconColor.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: AppRadii.borderMd,
             ),
             child: Icon(icon, color: iconColor, size: 22),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: AppSpacing.lg),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -608,13 +606,13 @@ class _ApiRecommendationCard extends StatelessWidget {
                             fontWeight: FontWeight.w600,
                           ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: AppSpacing.sm),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 2),
+                          horizontal: AppSpacing.sm, vertical: AppSpacing.xxs),
                       decoration: BoxDecoration(
                         color: highlightColor.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(4),
+                        borderRadius: AppRadii.borderXs,
                       ),
                       child: Text(
                         highlight,
@@ -626,14 +624,14 @@ class _ApiRecommendationCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 3),
+                const SizedBox(height: AppSpacing.xxs + 1),
                 Text(
                   tagline,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: AppColors.textSecondaryDark,
                       ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: AppSpacing.xs),
                 Text(
                   price,
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
@@ -643,17 +641,13 @@ class _ApiRecommendationCard extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 12),
-          Column(
-            children: [
-              Text(
-                url,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w500,
-                    ),
-              ),
-            ],
+          const SizedBox(width: AppSpacing.md),
+          Text(
+            url,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: AppColors.brandPrimary,
+                  fontWeight: FontWeight.w500,
+                ),
           ),
         ],
       ),
@@ -680,8 +674,8 @@ class _AddKeyPageState extends ConsumerState<_AddKeyPage> {
   final _keyController = TextEditingController();
   bool _obscureKey = true;
   bool _isAdding = false;
-  String? _errorMessage;
-  String? _successMessage;
+  AppStatusVariant? _feedbackVariant;
+  String? _feedbackMessage;
 
   @override
   void dispose() {
@@ -701,7 +695,8 @@ class _AddKeyPageState extends ConsumerState<_AddKeyPage> {
         [];
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(60, 40, 60, 40),
+      padding: const EdgeInsets.fromLTRB(
+          AppSpacing.xxl + 28, AppSpacing.xl, AppSpacing.xxl + 28, AppSpacing.xl),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -713,7 +708,7 @@ class _AddKeyPageState extends ConsumerState<_AddKeyPage> {
                   height: 1.2,
                 ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           Text(
             'Start with DeepSeek — it handles 90% of tasks at the best price. '
             'You can add more keys at any time via the sidebar.',
@@ -722,34 +717,31 @@ class _AddKeyPageState extends ConsumerState<_AddKeyPage> {
                   height: 1.5,
                 ),
           ),
-
-          const SizedBox(height: 24),
-
-          // ── Provider chips ─────────────────────────────
+          const SizedBox(height: AppSpacing.xl),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
             children: kSupportedProviders.map((p) {
               final selected = _selectedProvider == p.id;
               return GestureDetector(
                 onTap: () => setState(() {
                   _selectedProvider = p.id;
-                  _errorMessage = null;
-                  _successMessage = null;
+                  _feedbackVariant = null;
+                  _feedbackMessage = null;
                 }),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 150),
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 12, vertical: 7),
+                      horizontal: AppSpacing.md, vertical: 7),
                   decoration: BoxDecoration(
                     color: selected
                         ? p.color.withValues(alpha: 0.14)
-                        : AppColors.backgroundDark,
-                    borderRadius: BorderRadius.circular(8),
+                        : AppColors.surfaceBase,
+                    borderRadius: AppRadii.borderSm,
                     border: Border.all(
                       color: selected
                           ? p.color.withValues(alpha: 0.55)
-                          : AppColors.borderDark,
+                          : AppColors.borderSubtle,
                       width: selected ? 1.5 : 1,
                     ),
                   ),
@@ -763,7 +755,7 @@ class _AddKeyPageState extends ConsumerState<_AddKeyPage> {
                             ? p.color
                             : AppColors.textTertiaryDark,
                       ),
-                      const SizedBox(width: 6),
+                      const SizedBox(width: AppSpacing.xs),
                       Text(
                         p.displayName,
                         style: TextStyle(
@@ -782,10 +774,7 @@ class _AddKeyPageState extends ConsumerState<_AddKeyPage> {
               );
             }).toList(),
           ),
-
-          const SizedBox(height: 16),
-
-          // ── Key field ──────────────────────────────────
+          const SizedBox(height: AppSpacing.lg),
           TextField(
             controller: _keyController,
             obscureText: _obscureKey,
@@ -803,22 +792,22 @@ class _AddKeyPageState extends ConsumerState<_AddKeyPage> {
                 fontFamily: 'Inter',
               ),
               filled: true,
-              fillColor: AppColors.backgroundDark,
+              fillColor: AppColors.surfaceBase,
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(color: AppColors.borderDark),
+                borderRadius: AppRadii.borderSm,
+                borderSide: const BorderSide(color: AppColors.borderSubtle),
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(color: AppColors.borderDark),
+                borderRadius: AppRadii.borderSm,
+                borderSide: const BorderSide(color: AppColors.borderSubtle),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: AppRadii.borderSm,
                 borderSide: const BorderSide(
-                    color: AppColors.primary, width: 1.5),
+                    color: AppColors.brandPrimary, width: 1.5),
               ),
               contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16, vertical: 13),
+                  horizontal: AppSpacing.lg, vertical: 13),
               suffixIcon: IconButton(
                 onPressed: () =>
                     setState(() => _obscureKey = !_obscureKey),
@@ -833,77 +822,54 @@ class _AddKeyPageState extends ConsumerState<_AddKeyPage> {
             ),
             onSubmitted: (_) => _handleAdd(),
           ),
-
-          // ── Feedback ───────────────────────────────────
-          if (_errorMessage != null) ...[
-            const SizedBox(height: 10),
-            _OnboardingFeedback(message: _errorMessage!, isError: true),
+          if (_feedbackMessage != null && _feedbackVariant != null) ...[
+            const SizedBox(height: AppSpacing.sm),
+            AppStatusCard(
+              variant: _feedbackVariant!,
+              title: _feedbackMessage!,
+            ),
           ],
-          if (_successMessage != null) ...[
-            const SizedBox(height: 10),
-            _OnboardingFeedback(message: _successMessage!, isError: false),
-          ],
-
-          const SizedBox(height: 12),
-
-          // ── Add button ─────────────────────────────────
+          const SizedBox(height: AppSpacing.md),
           Row(
             children: [
-              SizedBox(
-                height: 42,
-                child: FilledButton.icon(
-                  onPressed: _isAdding ? null : _handleAdd,
-                  icon: _isAdding
-                      ? const SizedBox(
-                          width: 14,
-                          height: 14,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 1.5,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.white),
-                          ),
-                        )
-                      : const Icon(Icons.check_rounded, size: 16),
-                  label: Text(
-                      _isAdding ? 'Verifying…' : 'Add & Verify'),
-                ),
+              AppButton(
+                label: _isAdding ? 'Verifying…' : 'Add & Verify',
+                leadingIcon: _isAdding ? null : Icons.check_rounded,
+                onPressed: _isAdding ? null : _handleAdd,
+                isLoading: _isAdding,
               ),
               if (connectedKeys.isNotEmpty) ...[
-                const SizedBox(width: 12),
+                const SizedBox(width: AppSpacing.md),
                 Row(
                   children: [
                     const Icon(Icons.check_circle_rounded,
-                        size: 14, color: AppColors.success),
+                        size: 14, color: AppColors.statusSuccessFg),
                     const SizedBox(width: 5),
                     Text(
                       '${connectedKeys.length} key${connectedKeys.length == 1 ? '' : 's'} connected',
-                      style: Theme.of(context)
-                          .textTheme
-                          .labelSmall
-                          ?.copyWith(color: AppColors.success),
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: AppColors.statusSuccessFg,
+                          ),
                     ),
                   ],
                 ),
               ],
             ],
           ),
-
-          // ── Security note ─────────────────────────────
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(AppSpacing.md),
             decoration: BoxDecoration(
-              color: AppColors.savingsGreen.withValues(alpha: 0.06),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(
-                  color: AppColors.savingsGreen.withValues(alpha: 0.2)),
+              color: AppColors.statusInfoBg,
+              borderRadius: AppRadii.borderSm,
+              border: Border.all(color: AppColors.statusInfoBorder),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Icon(Icons.lock_outline,
-                    color: AppColors.savingsGreen, size: 15),
-                const SizedBox(width: 10),
+                    color: AppColors.statusInfoFg, size: 15),
+                const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
                     'Keys are stored in platform-native secure storage '
@@ -918,7 +884,6 @@ class _AddKeyPageState extends ConsumerState<_AddKeyPage> {
               ],
             ),
           ),
-
           const Spacer(),
           _NavButtons(
             onBack: widget.onBack,
@@ -936,16 +901,16 @@ class _AddKeyPageState extends ConsumerState<_AddKeyPage> {
     final key = _keyController.text.trim();
     if (key.isEmpty) {
       setState(() {
-        _errorMessage = 'Please paste your API key first.';
-        _successMessage = null;
+        _feedbackVariant = AppStatusVariant.warning;
+        _feedbackMessage = 'Please paste your API key first.';
       });
       return;
     }
 
     setState(() {
       _isAdding = true;
-      _errorMessage = null;
-      _successMessage = null;
+      _feedbackVariant = null;
+      _feedbackMessage = null;
     });
 
     try {
@@ -955,15 +920,16 @@ class _AddKeyPageState extends ConsumerState<_AddKeyPage> {
           );
       if (mounted) {
         setState(() {
-          _successMessage =
-              '${_selectedConfig.displayName} connected!';
+          _feedbackVariant = AppStatusVariant.success;
+          _feedbackMessage = '${_selectedConfig.displayName} connected!';
           _keyController.clear();
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _errorMessage =
+          _feedbackVariant = AppStatusVariant.error;
+          _feedbackMessage =
               e.toString().replaceAll(RegExp(r'^Exception:\s*'), '');
         });
       }
@@ -973,46 +939,8 @@ class _AddKeyPageState extends ConsumerState<_AddKeyPage> {
   }
 }
 
-class _OnboardingFeedback extends StatelessWidget {
-  const _OnboardingFeedback({required this.message, required this.isError});
-
-  final String message;
-  final bool isError;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = isError ? AppColors.error : AppColors.success;
-    final icon =
-        isError ? Icons.error_outline_rounded : Icons.check_circle_outline;
-    return Container(
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withValues(alpha: 0.25)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 13, color: color),
-          const SizedBox(width: 7),
-          Expanded(
-            child: Text(
-              message,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: color,
-                    height: 1.5,
-                  ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 // ──────────────────────────────────────────────────────────
-// Page 4: Done
+// Page 4: Done — uses AppSuccessGraphic
 // ──────────────────────────────────────────────────────────
 
 class _DonePage extends StatelessWidget {
@@ -1023,23 +951,13 @@ class _DonePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(60, 64, 60, 48),
+      padding: const EdgeInsets.fromLTRB(
+          AppSpacing.xxl + 28, 64, AppSpacing.xxl + 28, AppSpacing.xxl),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 64,
-            height: 64,
-            decoration: BoxDecoration(
-              color: AppColors.success.withValues(alpha: 0.12),
-              shape: BoxShape.circle,
-              border: Border.all(
-                  color: AppColors.success.withValues(alpha: 0.3), width: 1.5),
-            ),
-            child: const Icon(Icons.check_rounded,
-                color: AppColors.success, size: 32),
-          ),
-          const SizedBox(height: 28),
+          const AppSuccessGraphic(),
+          const SizedBox(height: AppSpacing.xl),
           Text(
             "You're all set.",
             style: Theme.of(context).textTheme.displayMedium?.copyWith(
@@ -1047,30 +965,31 @@ class _DonePage extends StatelessWidget {
                   fontWeight: FontWeight.w700,
                 ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: AppSpacing.md),
           Text(
-            'Briluxforge is ready. Add your API keys from the sidebar, enable skills to customise every conversation, '
+            'Briluxforge is ready. Add your API keys from the sidebar, '
+            'enable skills to customise every conversation, '
             'and watch your savings grow with every prompt.',
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   color: AppColors.textSecondaryDark,
                   height: 1.65,
                 ),
           ),
-          const SizedBox(height: 40),
+          const SizedBox(height: AppSpacing.xxl),
           const _DoneItem(
             icon: Icons.key_rounded,
-            color: AppColors.primary,
+            color: AppColors.brandPrimary,
             label: 'Add API keys',
             detail: 'Settings → API Keys',
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
           const _DoneItem(
             icon: Icons.psychology_outlined,
             color: Color(0xFFA78BFA),
             label: 'Enable skills',
             detail: 'Sidebar → Skills',
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
           const _DoneItem(
             icon: Icons.chat_bubble_outline_rounded,
             color: AppColors.savingsGreen,
@@ -1080,17 +999,11 @@ class _DonePage extends StatelessWidget {
           const Spacer(),
           SizedBox(
             width: double.infinity,
-            height: 52,
-            child: FilledButton(
+            child: AppButton(
+              label: 'Open Briluxforge',
+              leadingIcon: Icons.arrow_forward_rounded,
               onPressed: onComplete,
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('Open Briluxforge'),
-                  SizedBox(width: 8),
-                  Icon(Icons.arrow_forward_rounded, size: 18),
-                ],
-              ),
+              size: AppButtonSize.large,
             ),
           ),
         ],
@@ -1121,11 +1034,11 @@ class _DoneItem extends StatelessWidget {
           height: 40,
           decoration: BoxDecoration(
             color: color.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: AppRadii.borderSm,
           ),
           child: Icon(icon, color: color, size: 20),
         ),
-        const SizedBox(width: 16),
+        const SizedBox(width: AppSpacing.lg),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -1168,25 +1081,18 @@ class _NavButtons extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        SizedBox(
-          height: 48,
-          child: OutlinedButton(
-            onPressed: onBack,
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              side: const BorderSide(color: AppColors.borderDark),
-            ),
-            child: const Text('Back'),
-          ),
+        AppButton(
+          label: 'Back',
+          variant: AppButtonVariant.secondary,
+          size: AppButtonSize.large,
+          onPressed: onBack,
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: AppSpacing.md),
         Expanded(
-          child: SizedBox(
-            height: 48,
-            child: FilledButton(
-              onPressed: onNext,
-              child: Text(nextLabel),
-            ),
+          child: AppButton(
+            label: nextLabel,
+            size: AppButtonSize.large,
+            onPressed: onNext,
           ),
         ),
       ],

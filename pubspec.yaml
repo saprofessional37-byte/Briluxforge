@@ -38,6 +38,14 @@ dependencies:
   url_launcher: ^6.3.0
   google_fonts: ^6.2.0
 
+  # OTA Update System (Phase 11 — approved by architect 2026-04-21)
+  # desktop_updater dropped: conflicts with flutter_secure_storage ^9.x via
+  # cryptography_plus. Download + extract + swap implemented in-house per §2.2.
+  archive: ^3.6.0
+  cryptography: ^2.7.0
+  package_info_plus: ^8.0.0
+  crypto: ^3.0.0
+
   # Utility
   uuid: ^4.4.0
   equatable: ^2.0.0
