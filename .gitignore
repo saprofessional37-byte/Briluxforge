@@ -198,3 +198,4 @@ gumroad_test_keys.txt
 coverage/
 test/.test_coverage.dart
 lcov.info
+.claude/
