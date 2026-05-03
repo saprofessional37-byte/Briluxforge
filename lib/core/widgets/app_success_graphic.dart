@@ -37,7 +37,6 @@ class _AppSuccessGraphicState extends State<AppSuccessGraphic> {
         shape: BoxShape.circle,
         border: Border.all(
           color: AppColors.brandPrimary.withValues(alpha: 0.20),
-          width: 1,
         ),
         boxShadow: AppElevation.subtle,
       ),

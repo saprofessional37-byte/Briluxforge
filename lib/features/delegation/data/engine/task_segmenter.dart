@@ -269,7 +269,7 @@ class TaskSegmenter {
           sum += wk.weight;
         }
       }
-      if (sum > 0) scores[entry.key] = sum;
+      if (sum > 0) scores[entry.key.jsonKey] = sum;
     }
     return scores;
   }

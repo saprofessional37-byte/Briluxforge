@@ -157,7 +157,7 @@ class _DelegationDialogBodyState extends State<_DelegationDialogBody> {
                         setState(() => _remember = v ?? false),
                     activeColor: AppColors.brandPrimary,
                     side: BorderSide(color: borderColor, width: 1.5),
-                    shape: RoundedRectangleBorder(
+                    shape: const RoundedRectangleBorder(
                       borderRadius: AppRadii.borderXs,
                     ),
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,

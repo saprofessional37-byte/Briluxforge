@@ -114,7 +114,6 @@ echo Briluxforge updater failed. Please reinstall from the website. >&2
         'cmd',
         ['/c', 'start', '/b', scriptFile.path],
         mode: ProcessStartMode.detached,
-        runInShell: false,
       );
     } catch (e, st) {
       AppLogger.e('[Installer]', 'Failed to launch Windows installer.', e, st);

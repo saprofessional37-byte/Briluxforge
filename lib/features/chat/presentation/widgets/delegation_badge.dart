@@ -212,7 +212,7 @@ class _RoutingDetailDialog extends StatelessWidget {
 
     return Dialog(
       backgroundColor: AppColors.surfaceDark,
-      shape: RoundedRectangleBorder(borderRadius: AppRadii.borderLg),
+      shape: const RoundedRectangleBorder(borderRadius: AppRadii.borderLg),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 480, maxHeight: 560),
         child: Padding(

@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
 import 'package:briluxforge/core/theme/app_colors.dart';
-import 'package:briluxforge/core/theme/app_spacing.dart';
 import 'package:briluxforge/core/theme/app_tokens.dart';
 
 /// Scrollable markdown renderer for update release notes.
@@ -44,7 +43,6 @@ class ReleaseNotesView extends StatelessWidget {
         child: SingleChildScrollView(
           child: MarkdownBody(
             data: markdown,
-            selectable: false,
             styleSheet:
                 MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
               p: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -71,7 +69,7 @@ class ReleaseNotesView extends StatelessWidget {
                     color: AppColors.accent,
                     backgroundColor: AppColors.codeBlockBackgroundDark,
                   ),
-              codeblockDecoration: BoxDecoration(
+              codeblockDecoration: const BoxDecoration(
                 color: AppColors.codeBlockBackgroundDark,
                 borderRadius: AppRadii.borderSm,
               ),

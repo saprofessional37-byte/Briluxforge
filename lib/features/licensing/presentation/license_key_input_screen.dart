@@ -147,7 +147,7 @@ class _LicenseKeyInputScreenState
                   Container(
                     width: 48,
                     height: 48,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: AppColors.statusWarnBg,
                       borderRadius: AppRadii.borderMd,
                     ),

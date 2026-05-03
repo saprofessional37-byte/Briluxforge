@@ -12,6 +12,8 @@ class ModelProfile {
     required this.costPer1kInput,
     required this.costPer1kOutput,
     required this.tier,
+    required this.latencyHintMs,
+    required this.descriptionForAdmin,
     this.isBenchmark = false,
   });
 
@@ -26,6 +28,8 @@ class ModelProfile {
         costPer1kInput: (json['costPer1kInput'] as num).toDouble(),
         costPer1kOutput: (json['costPer1kOutput'] as num).toDouble(),
         tier: json['tier'] as String,
+        latencyHintMs: json['latencyHintMs'] as int? ?? 999,
+        descriptionForAdmin: json['descriptionForAdmin'] as String? ?? '',
         isBenchmark: json['isBenchmark'] as bool? ?? false,
       );
 
@@ -37,8 +41,18 @@ class ModelProfile {
   final double costPer1kInput;
   final double costPer1kOutput;
   final String tier;
+
+  /// Approximate median response latency in milliseconds (informational).
+  final int latencyHintMs;
+
+  /// One-sentence rationale for why this model is in the brain.
+  final String descriptionForAdmin;
+
   final bool isBenchmark;
 
   bool get isWorkhorse => tier == 'workhorse';
   bool get isPremium => tier == 'premium';
+  bool get isSpecialist => tier == 'specialist';
+
+  double get totalCostPer1k => costPer1kInput + costPer1kOutput;
 }

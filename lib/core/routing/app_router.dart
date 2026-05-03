@@ -1,6 +1,7 @@
 // lib/core/routing/app_router.dart
 import 'package:flutter/material.dart';
 
+import 'package:briluxforge/features/admin/presentation/admin_inspector_screen.dart';
 import 'package:briluxforge/features/api_keys/presentation/api_key_screen.dart';
 import 'package:briluxforge/features/auth/presentation/login_screen.dart';
 import 'package:briluxforge/features/auth/presentation/signup_screen.dart';
@@ -21,6 +22,11 @@ abstract final class AppRoutes {
   static const String settings = '/settings';
   static const String skills = '/skills';
   static const String skillEditor = '/skill-editor';
+
+  /// Admin-gated route — only reachable when the admin gate is unlocked.
+  /// The settings screen is the sole entry point; deep-link navigation to
+  /// this route without an unlocked gate falls through to LoginScreen.
+  static const String adminInspector = '/admin/inspector';
 }
 
 Route<Object?> onGenerateRoute(RouteSettings settings) {
@@ -36,6 +42,7 @@ Route<Object?> onGenerateRoute(RouteSettings settings) {
     AppRoutes.skills => _slide(const SkillsScreen()),
     AppRoutes.skillEditor =>
       _slide(_buildSkillEditor(settings.arguments)),
+    AppRoutes.adminInspector => _slide(const AdminInspectorScreen()),
     _ => _fade(const LoginScreen()),
   };
 }

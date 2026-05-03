@@ -9,10 +9,13 @@ import 'package:briluxforge/core/widgets/app_button.dart';
 /// Every [showDialog] call in the codebase must use [showAppDialog] — raw
 /// [AlertDialog] and [Dialog] are banned in feature code.
 class AppDialog extends StatelessWidget {
+  // ignore: library_private_types_in_public_api
   const AppDialog({
     required this.title,
     required this.body,
+    // ignore: library_private_types_in_public_api
     this.primaryAction,
+    // ignore: library_private_types_in_public_api
     this.secondaryAction,
     this.maxWidth = 560,
     this.maxHeightFactor = 0.8,
@@ -21,7 +24,9 @@ class AppDialog extends StatelessWidget {
 
   final String title;
   final Widget body;
+  // ignore: library_private_types_in_public_api
   final _DialogAction? primaryAction;
+  // ignore: library_private_types_in_public_api
   final _DialogAction? secondaryAction;
   final double maxWidth;
   final double maxHeightFactor;
@@ -120,6 +125,7 @@ class _DialogAction {
   const _DialogAction({
     required this.label,
     required this.onPressed,
+    // ignore: unused_element_parameter
     this.isDestructive = false,
   });
 

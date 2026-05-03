@@ -8,6 +8,13 @@ import 'package:briluxforge/core/widgets/app_button.dart';
 import 'package:briluxforge/features/onboarding/presentation/widgets/use_case_card.dart';
 import 'package:briluxforge/features/onboarding/providers/onboarding_provider.dart';
 
+// Layout constants: 3 cards per row × 200px + 2 gaps × 16px = 632px < 720 max.
+// Two rows: 2 × 200px + 1 gap × 16px = 416px.
+// Header ~100px + spacing 24px + grid 416px + spacing 24px + button 52px ≈ 616px.
+// Min window height raised to 640px (app_constants.dart) for headroom.
+const double _kCardSize = 200;
+const double _kCardGap = 16;
+
 class UseCaseScreen extends ConsumerWidget {
   const UseCaseScreen({required this.onNext, super.key});
 
@@ -29,8 +36,10 @@ class UseCaseScreen extends ConsumerWidget {
             AppSpacing.xl,
           ),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // ── Header ────────────────────────────────────────────────
               Text(
                 'What will you use\nBriluxforge for?',
                 style: Theme.of(context).textTheme.displaySmall?.copyWith(
@@ -48,24 +57,33 @@ class UseCaseScreen extends ConsumerWidget {
                     ),
               ),
               const SizedBox(height: AppSpacing.xl),
-              Expanded(
-                child: ListView.separated(
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: UseCaseType.values.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
-                  itemBuilder: (context, i) {
-                    final useCase = UseCaseType.values[i];
-                    return UseCaseCard(
+
+              // ── Use-case card grid ────────────────────────────────────
+              // Wrap places five 200×200 cards in a 3+2 layout automatically.
+              // No SingleChildScrollView — the layout is designed to fit in
+              // the minimum 900×640 window without scrolling.
+              Wrap(
+                spacing: _kCardGap,
+                runSpacing: _kCardGap,
+                alignment: WrapAlignment.center,
+                children: UseCaseType.values.map((useCase) {
+                  return SizedBox(
+                    width: _kCardSize,
+                    height: _kCardSize,
+                    child: UseCaseCard(
                       useCase: useCase,
                       isSelected: selected == useCase,
                       onTap: () => ref
                           .read(onboardingNotifierProvider.notifier)
                           .selectUseCase(useCase),
-                    );
-                  },
-                ),
+                    ),
+                  );
+                }).toList(),
               ),
+
               const SizedBox(height: AppSpacing.xl),
+
+              // ── Continue button ───────────────────────────────────────
               SizedBox(
                 width: double.infinity,
                 child: AppButton(

@@ -27,7 +27,7 @@ class _SavingsBreakdownDialog extends StatelessWidget {
 
     return Dialog(
       backgroundColor: AppColors.surfaceDark,
-      shape: RoundedRectangleBorder(borderRadius: AppRadii.borderLg),
+      shape: const RoundedRectangleBorder(borderRadius: AppRadii.borderLg),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 560, maxHeight: 680),
         child: Padding(
@@ -356,7 +356,7 @@ class _MathExplanation extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: AppColors.surfaceElevatedDark,
         borderRadius: AppRadii.borderSm,
       ),

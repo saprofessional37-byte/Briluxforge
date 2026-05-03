@@ -117,7 +117,6 @@ class UpdaterService {
     // Emit initial idle state.
     _setState(UpdateIdle(
       installedVersion: _installedVersion,
-      lastCheckAt: null,
     ));
 
     // 3. Reconcile pending update (cross-check disk + Drift table).
@@ -326,7 +325,6 @@ class UpdaterService {
         if (_currentState is UpdateFailed) {
           _setState(UpdateIdle(
             installedVersion: _installedVersion,
-            lastCheckAt: null,
           ));
         }
       });

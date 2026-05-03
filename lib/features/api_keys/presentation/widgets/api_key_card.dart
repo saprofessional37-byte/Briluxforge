@@ -119,6 +119,7 @@ class _ApiKeyCardState extends ConsumerState<ApiKeyCard> {
 
 /// Holds the last verification error.
 class _VerifyError {
+  // ignore: unused_element_parameter
   const _VerifyError({this.exception, this.raw});
 
   final AppException? exception;

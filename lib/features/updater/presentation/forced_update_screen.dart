@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:briluxforge/core/theme/app_colors.dart';
-import 'package:briluxforge/core/theme/app_spacing.dart';
 import 'package:briluxforge/core/theme/app_tokens.dart';
 import 'package:briluxforge/features/updater/data/models/update_state.dart';
 import 'package:briluxforge/features/updater/presentation/widgets/release_notes_view.dart';
@@ -95,7 +94,7 @@ class _InstallingOverlay extends StatelessWidget {
             Container(
               width: 56,
               height: 56,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: AppColors.primary,
                 borderRadius: AppRadii.borderLg,
               ),
@@ -114,9 +113,9 @@ class _InstallingOverlay extends StatelessWidget {
             const SizedBox(height: AppSpacing.lg),
 
             // Indeterminate progress bar
-            SizedBox(
+            const SizedBox(
               width: 280,
-              child: const UpdateProgressBar(),
+              child: UpdateProgressBar(),
             ),
             const SizedBox(height: AppSpacing.md),
 
@@ -185,7 +184,7 @@ class _ForcedUpdateScreen extends ConsumerWidget {
                 Container(
                   width: 56,
                   height: 56,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: AppColors.primary,
                     borderRadius: AppRadii.borderLg,
                   ),
@@ -209,7 +208,7 @@ class _ForcedUpdateScreen extends ConsumerWidget {
                 Text(
                   targetVersion.isNotEmpty
                       ? "We've released a critical fix for Briluxforge "
-                          "$targetVersion. To keep your data and API keys "
+                          '$targetVersion. To keep your data and API keys '
                           'safe, this update must be installed before you '
                           'can continue.'
                       : 'A critical update must be installed before you '
@@ -232,8 +231,8 @@ class _ForcedUpdateScreen extends ConsumerWidget {
                     child: child,
                   ),
                   child: isReady
-                      ? _InstallButton(
-                          key: const ValueKey('install_btn'),
+                      ? const _InstallButton(
+                          key: ValueKey('install_btn'),
                         )
                       : _DownloadProgress(
                           key: const ValueKey('dl_progress'),
@@ -270,13 +269,12 @@ class _ForcedUpdateScreen extends ConsumerWidget {
   void _showWhyModal(BuildContext context, String markdown) {
     showDialog<void>(
       context: context,
-      barrierDismissible: true,
       builder: (ctx) => Dialog(
         backgroundColor: AppColors.surfaceElevatedDark,
         elevation: 2,
-        shape: RoundedRectangleBorder(
+        shape: const RoundedRectangleBorder(
           borderRadius: AppRadii.borderMd,
-          side: const BorderSide(color: AppColors.borderDark),
+          side: BorderSide(color: AppColors.borderDark),
         ),
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 480),

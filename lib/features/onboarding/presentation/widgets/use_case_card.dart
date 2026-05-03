@@ -7,6 +7,8 @@ import 'package:briluxforge/core/theme/app_tokens.dart';
 import 'package:briluxforge/core/widgets/app_card.dart';
 import 'package:briluxforge/features/onboarding/providers/onboarding_provider.dart';
 
+// Phase 13 §13.7.2: card is 200×200 (constrained by parent SizedBox in the
+// Wrap). Illustration shrunk to 80px so the card reads as square.
 class UseCaseCard extends StatelessWidget {
   const UseCaseCard({
     required this.useCase,
@@ -20,19 +22,19 @@ class UseCaseCard extends StatelessWidget {
   final VoidCallback onTap;
 
   String get _svgAsset => switch (useCase) {
-        UseCaseType.coding   => 'assets/images/onboarding/coding.svg',
+        UseCaseType.coding => 'assets/images/onboarding/coding.svg',
         UseCaseType.research => 'assets/images/onboarding/research.svg',
-        UseCaseType.writing  => 'assets/images/onboarding/writing.svg',
+        UseCaseType.writing => 'assets/images/onboarding/writing.svg',
         UseCaseType.building => 'assets/images/onboarding/building.svg',
-        UseCaseType.general  => 'assets/images/onboarding/general.svg',
+        UseCaseType.general => 'assets/images/onboarding/general.svg',
       };
 
   Color get _accentColor => switch (useCase) {
-        UseCaseType.coding   => AppColors.accentBlue,
+        UseCaseType.coding => AppColors.accentBlue,
         UseCaseType.research => AppColors.accentGreen,
-        UseCaseType.writing  => AppColors.accentViolet,
+        UseCaseType.writing => AppColors.accentViolet,
         UseCaseType.building => AppColors.accentAmber,
-        UseCaseType.general  => AppColors.accentPink,
+        UseCaseType.general => AppColors.accentPink,
       };
 
   @override
@@ -56,57 +58,52 @@ class UseCaseCard extends StatelessWidget {
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.xl,
-            vertical: AppSpacing.lg,
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.md,
           ),
-          child: Row(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // 96×96 illustration — no dark container box
+              // 80px illustration — down from 96px so the card is square.
               SvgPicture.asset(
                 _svgAsset,
-                width: 96,
-                height: 96,
+                width: 80,
+                height: 80,
                 colorFilter: ColorFilter.mode(
                   _accentColor,
                   BlendMode.srcIn,
                 ),
               ),
-              const SizedBox(width: AppSpacing.lg),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      useCase.displayName,
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleSmall
-                          ?.copyWith(
-                            color: AppColors.textPrimaryDark,
-                            fontWeight: FontWeight.w600,
-                          ),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                useCase.displayName,
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      color: AppColors.textPrimaryDark,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
                     ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      useCase.description,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.textSecondaryDark,
-                            height: 1.5,
-                          ),
-                    ),
-                  ],
-                ),
+                textAlign: TextAlign.center,
               ),
+              const SizedBox(height: AppSpacing.xxs),
+              Text(
+                useCase.description,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.textSecondaryDark,
+                      height: 1.4,
+                      fontSize: 11,
+                    ),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: AppSpacing.xs),
               AnimatedOpacity(
                 opacity: isSelected ? 1.0 : 0.0,
                 duration: const Duration(milliseconds: 160),
-                child: Padding(
-                  padding: const EdgeInsets.only(left: AppSpacing.md),
-                  child: Icon(
-                    Icons.check_circle_rounded,
-                    color: AppColors.brandPrimary,
-                    size: 20,
-                  ),
+                child: const Icon(
+                  Icons.check_circle_rounded,
+                  color: AppColors.brandPrimary,
+                  size: 18,
                 ),
               ),
             ],

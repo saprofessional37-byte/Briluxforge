@@ -15,7 +15,7 @@ abstract final class ErrorTranslator {
     String? actionLabel,
   }) {
     return switch (exception) {
-      ApiKeyNotFoundException e => UserFacingError(
+      final ApiKeyNotFoundException e => UserFacingError(
           headline: 'API key not found',
           explanation:
               'No key is saved for ${e.provider}. Add one in Settings → API Keys.',
@@ -25,13 +25,13 @@ abstract final class ErrorTranslator {
           technicalDetails: _sanitize(e.technicalDetail ?? e.message),
         ),
 
-      ApiRequestException e => _translateApiRequest(
+      final ApiRequestException e => _translateApiRequest(
           e,
           onAction: onAction,
           actionLabel: actionLabel,
         ),
 
-      DelegationException e => UserFacingError(
+      final DelegationException e => UserFacingError(
           headline: 'Delegation failed',
           explanation: 'The routing engine could not assign a model. '
               'Try rephrasing or sending to a specific model directly.',
@@ -52,7 +52,7 @@ abstract final class ErrorTranslator {
           technicalDetails: _sanitize(exception.technicalDetail),
         ),
 
-      AuthException e => UserFacingError(
+      final AuthException e => UserFacingError(
           headline: 'Sign-in failed',
           explanation: e.message.isNotEmpty
               ? e.message
@@ -63,7 +63,7 @@ abstract final class ErrorTranslator {
           technicalDetails: _sanitize(e.technicalDetail),
         ),
 
-      LicenseValidationException e => UserFacingError(
+      final LicenseValidationException e => UserFacingError(
           headline: 'License could not be verified',
           explanation: e.message.isNotEmpty
               ? e.message
@@ -131,7 +131,10 @@ abstract final class ErrorTranslator {
     void Function()? onAction,
     String? actionLabel,
   }) {
-    final code = e.statusCode;
+    // Unwrap the nullable status code once so that relational guards
+    // (>= 500) inside the switch expression operate on a non-nullable int.
+    final int? nullableCode = e.statusCode;
+    final int code = nullableCode ?? -1;
 
     final (headline, explanation) = switch (code) {
       401 || 403 => (
@@ -164,7 +167,7 @@ abstract final class ErrorTranslator {
               ? 'Open API Key Settings'
               : 'Retry'),
       onAction: onAction,
-      severity: code != null && code >= 500
+      severity: code >= 500
           ? AppStatusVariant.warning
           : AppStatusVariant.error,
       technicalDetails: _sanitize(e.technicalDetail),

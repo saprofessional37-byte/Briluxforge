@@ -132,7 +132,7 @@ class _SidebarHeader extends StatelessWidget {
           Container(
             width: 28,
             height: 28,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: AppColors.primary,
               borderRadius: AppRadii.borderSm,
             ),
@@ -238,13 +238,13 @@ class _SearchField extends StatelessWidget {
             vertical: 8,
           ),
           isDense: true,
-          border: OutlineInputBorder(
+          border: const OutlineInputBorder(
             borderRadius: AppRadii.borderSm,
-            borderSide: const BorderSide(color: AppColors.borderDark),
+            borderSide: BorderSide(color: AppColors.borderDark),
           ),
-          enabledBorder: OutlineInputBorder(
+          enabledBorder: const OutlineInputBorder(
             borderRadius: AppRadii.borderSm,
-            borderSide: const BorderSide(color: AppColors.borderDark),
+            borderSide: BorderSide(color: AppColors.borderDark),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: AppRadii.borderSm,
@@ -693,9 +693,9 @@ class _SidebarFooter extends ConsumerWidget {
                 position: PopupMenuPosition.over,
                 offset: const Offset(0, -8),
                 color: AppColors.surfaceElevatedDark,
-                shape: RoundedRectangleBorder(
+                shape: const RoundedRectangleBorder(
                   borderRadius: AppRadii.borderMd,
-                  side: const BorderSide(color: AppColors.borderDark),
+                  side: BorderSide(color: AppColors.borderDark),
                 ),
                 itemBuilder: (_) => [
                   // Email header — non-interactive.

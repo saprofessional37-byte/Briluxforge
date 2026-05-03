@@ -1,4 +1,7 @@
 // lib/features/settings/providers/settings_provider.dart
+// Phase 13 §13.6: themeMode field deprecated and frozen at ThemeMode.dark.
+// setThemeMode is a no-op. The persisted SharedPreferences key remains
+// readable so old installs upgrading to this build do not crash.
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' show ThemeMode;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -15,7 +18,8 @@ part 'settings_provider.g.dart';
 abstract final class _PrefsKeys {
   static const String defaultModelId = 'default_model_id';
 
-  /// Current key — stores one of 'light' | 'dark' | 'system'.
+  /// Legacy theme key — readable for backwards compat but never written.
+  // ignore: unused_field
   static const String themeMode = 'settings.themeMode';
 
   /// Legacy bool key from the pre-ThemeMode era. Read once during migration.
@@ -24,27 +28,18 @@ abstract final class _PrefsKeys {
   static const String reconcilerNotification = 'reconciler_notification';
 }
 
-ThemeMode _parseThemeMode(String? value) => switch (value) {
-      'light' => ThemeMode.light,
-      'system' => ThemeMode.system,
-      _ => ThemeMode.dark,
-    };
-
-String _serializeThemeMode(ThemeMode mode) => switch (mode) {
-      ThemeMode.light => 'light',
-      ThemeMode.system => 'system',
-      ThemeMode.dark || _ => 'dark',
-    };
-
 @immutable
 class SettingsState {
   const SettingsState({
     required this.defaultModelId,
-    required this.themeMode,
+    @Deprecated('Phase 13: locked to dark. Use AppTheme.darkTheme directly.')
+    this.themeMode = ThemeMode.dark,
     this.reconcilerNotification,
   });
 
   final String defaultModelId;
+
+  @Deprecated('Phase 13: locked to dark. Use AppTheme.darkTheme directly.')
   final ThemeMode themeMode;
 
   /// Non-null when the DefaultModelReconciler changed the default on this
@@ -53,13 +48,13 @@ class SettingsState {
 
   SettingsState copyWith({
     String? defaultModelId,
+    // ignore: deprecated_member_use_from_same_package
     ThemeMode? themeMode,
     String? reconcilerNotification,
     bool clearNotification = false,
   }) =>
       SettingsState(
         defaultModelId: defaultModelId ?? this.defaultModelId,
-        themeMode: themeMode ?? this.themeMode,
         reconcilerNotification: clearNotification
             ? null
             : reconcilerNotification ?? this.reconcilerNotification,
@@ -72,20 +67,15 @@ class SettingsNotifier extends _$SettingsNotifier {
   Future<SettingsState> build() async {
     final prefs = await ref.watch(sharedPreferencesProvider.future);
 
-    // ── Migration from legacy boolean key ──────────────────────────────────
-    // If the old key exists, convert its value to the new string key once and
-    // remove the old key. This runs on the first launch after the upgrade.
+    // Migration from legacy boolean key (one-time, forward-compat).
     final legacyBool = prefs.getBool(_PrefsKeys.legacyIsDarkTheme);
     if (legacyBool != null) {
-      final migrated = legacyBool ? 'dark' : 'light';
-      await prefs.setString(_PrefsKeys.themeMode, migrated);
       await prefs.remove(_PrefsKeys.legacyIsDarkTheme);
     }
 
     return SettingsState(
       defaultModelId:
           prefs.getString(_PrefsKeys.defaultModelId) ?? 'deepseek-chat',
-      themeMode: _parseThemeMode(prefs.getString(_PrefsKeys.themeMode)),
       reconcilerNotification:
           prefs.getString(_PrefsKeys.reconcilerNotification),
     );
@@ -98,10 +88,11 @@ class SettingsNotifier extends _$SettingsNotifier {
     AppLogger.i('SettingsProvider', 'Default model set to: $id');
   }
 
+  /// No-op: theme is locked to dark in Phase 13.
+  @Deprecated('Phase 13: theme is locked to dark. Call has no effect.')
   Future<void> setThemeMode(ThemeMode mode) async {
-    final prefs = await ref.read(sharedPreferencesProvider.future);
-    await prefs.setString(_PrefsKeys.themeMode, _serializeThemeMode(mode));
-    state = AsyncData(state.value!.copyWith(themeMode: mode));
+    AppLogger.w('Settings',
+        'setThemeMode called but theme is locked to dark in Phase 13');
   }
 
   Future<void> clearReconcilerNotification() async {
@@ -111,11 +102,7 @@ class SettingsNotifier extends _$SettingsNotifier {
   }
 }
 
-/// Runs the [DefaultModelReconciler] once per app launch, immediately after
-/// [modelProfilesProvider] and [apiKeyNotifierProvider] are available.
-///
-/// Must complete before the chat UI becomes interactive (enforced in app.dart).
-/// Returns true if the default was changed, false if no change was needed.
+/// Runs the [DefaultModelReconciler] once per app launch.
 @Riverpod(keepAlive: true)
 Future<bool> defaultModelReconciler(Ref ref) async {
   final profilesData = await ref.watch(modelProfilesProvider.future);

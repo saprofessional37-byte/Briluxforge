@@ -9,7 +9,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:briluxforge/core/constants/app_constants.dart';
 import 'package:briluxforge/core/theme/app_colors.dart';
-import 'package:briluxforge/core/theme/app_spacing.dart';
 import 'package:briluxforge/core/theme/app_tokens.dart';
 import 'package:briluxforge/core/widgets/app_toggle.dart';
 import 'package:briluxforge/features/updater/data/models/update_state.dart';
@@ -84,7 +83,7 @@ class _SettingsUpdatesSectionState
             duration: const Duration(seconds: 3),
             backgroundColor: AppColors.surfaceElevatedDark,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
+            shape: const RoundedRectangleBorder(
               borderRadius: AppRadii.borderSm,
             ),
           ),
@@ -302,6 +301,7 @@ class _CheckingLabel extends StatelessWidget {
 // ── Helper: last-checked relative time ───────────────────────────────────────
 
 class _LastCheckedLabel extends StatelessWidget {
+  // ignore: unused_element_parameter
   const _LastCheckedLabel({super.key, required this.lastCheckAt});
 
   final DateTime? lastCheckAt;

@@ -17,6 +17,7 @@ import 'package:briluxforge/features/delegation/providers/model_profiles_provide
 import 'package:briluxforge/features/licensing/data/models/license_model.dart';
 import 'package:briluxforge/features/licensing/providers/license_provider.dart';
 import 'package:briluxforge/features/onboarding/providers/onboarding_provider.dart';
+import 'package:briluxforge/features/admin/providers/admin_provider.dart';
 import 'package:briluxforge/features/settings/providers/settings_provider.dart';
 import 'package:briluxforge/features/updater/presentation/settings_updates_section.dart';
 
@@ -41,25 +42,25 @@ class SettingsScreen extends ConsumerWidget {
                     AppSpacing.xl,
                     AppSpacing.xxxl,
                   ),
-                  children: const [
-                    SizedBox(height: AppSpacing.xl),
-                    _AccountSection(),
-                    SizedBox(height: AppSpacing.xs),
-                    _LicenseSection(),
-                    SizedBox(height: AppSpacing.xs),
-                    _DefaultModelSection(),
-                    SizedBox(height: AppSpacing.xs),
-                    _UseCaseSection(),
-                    SizedBox(height: AppSpacing.xs),
-                    _AppearanceSection(),
-                    SizedBox(height: AppSpacing.xs),
-                    SettingsUpdatesSection(),
-                    SizedBox(height: AppSpacing.xs),
-                    _FeaturesSection(),
-                    SizedBox(height: AppSpacing.xs),
-                    _HelpSection(),
-                    SizedBox(height: AppSpacing.xs),
-                    _AboutSection(),
+                  children: [
+                    const SizedBox(height: AppSpacing.xl),
+                    const _AccountSection(),
+                    const SizedBox(height: AppSpacing.xs),
+                    const _LicenseSection(),
+                    const SizedBox(height: AppSpacing.xs),
+                    const _DefaultModelSection(),
+                    const SizedBox(height: AppSpacing.xs),
+                    const _UseCaseSection(),
+                    const SizedBox(height: AppSpacing.xs),
+                    const SettingsUpdatesSection(),
+                    const SizedBox(height: AppSpacing.xs),
+                    const _FeaturesSection(),
+                    const SizedBox(height: AppSpacing.xs),
+                    const _DeveloperSection(),
+                    const SizedBox(height: AppSpacing.xs),
+                    const _HelpSection(),
+                    const SizedBox(height: AppSpacing.xs),
+                    const _AboutSection(),
                   ],
                 ),
               ),
@@ -799,79 +800,6 @@ class _UseCaseSection extends ConsumerWidget {
       };
 }
 
-// ── Appearance section ────────────────────────────────────────────────────────
-
-class _AppearanceSection extends ConsumerWidget {
-  const _AppearanceSection();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final settingsAsync = ref.watch(settingsNotifierProvider);
-    final currentMode =
-        settingsAsync.valueOrNull?.themeMode ?? ThemeMode.dark;
-
-    return _Section(
-      label: 'Appearance',
-      child: _SectionRow(
-        isLast: true,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Icon(
-                  Icons.brightness_6_outlined,
-                  size: 18,
-                  color: AppColors.textSecondary,
-                ),
-                const SizedBox(width: AppSpacing.md),
-                Text(
-                  'Theme',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textPrimary,
-                        fontWeight: FontWeight.w500,
-                      ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.md),
-            SegmentedButton<ThemeMode>(
-              segments: const [
-                ButtonSegment(
-                  value: ThemeMode.system,
-                  label: Text('System'),
-                  icon: Icon(Icons.brightness_auto_outlined, size: 14),
-                ),
-                ButtonSegment(
-                  value: ThemeMode.light,
-                  label: Text('Light'),
-                  icon: Icon(Icons.light_mode_outlined, size: 14),
-                ),
-                ButtonSegment(
-                  value: ThemeMode.dark,
-                  label: Text('Dark'),
-                  icon: Icon(Icons.dark_mode_outlined, size: 14),
-                ),
-              ],
-              selected: {currentMode},
-              onSelectionChanged: settingsAsync.isLoading
-                  ? null
-                  : (Set<ThemeMode> selection) => ref
-                      .read(settingsNotifierProvider.notifier)
-                      .setThemeMode(selection.first),
-              style: ButtonStyle(
-                textStyle: WidgetStateProperty.all(
-                  const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 // ── Features section ──────────────────────────────────────────────────────────
 
 class _FeaturesSection extends StatelessWidget {
@@ -974,6 +902,172 @@ class _FeaturesSection extends StatelessWidget {
   }
 }
 
+// ── Developer section (admin-gated) ───────────────────────────────────────────
+
+class _DeveloperSection extends ConsumerStatefulWidget {
+  const _DeveloperSection();
+
+  @override
+  ConsumerState<_DeveloperSection> createState() => _DeveloperSectionState();
+}
+
+class _DeveloperSectionState extends ConsumerState<_DeveloperSection> {
+  final _secretController = TextEditingController();
+  bool _unlocking = false;
+  String? _error;
+
+  @override
+  void dispose() {
+    _secretController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _tryUnlock() async {
+    setState(() {
+      _unlocking = true;
+      _error = null;
+    });
+    final success = await ref.read(adminGateNotifierProvider.notifier).unlock(
+          email: AppConstants.kAdminEmail,
+          secret: _secretController.text,
+        );
+    if (mounted) {
+      setState(() {
+        _unlocking = false;
+        if (!success) { _error = 'Incorrect secret.'; }
+        else { _secretController.clear(); }
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final gateAsync = ref.watch(adminGateNotifierProvider);
+    final isUnlocked = gateAsync.valueOrNull?.isUnlocked ?? false;
+
+    // Completely absent from the widget tree when not unlocked.
+    if (!isUnlocked) {
+      return _Section(
+        label: 'Developer',
+        child: _SectionRow(
+          isLast: true,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Enter admin secret to unlock developer tools.',
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: AppColors.textTertiary,
+                    ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _secretController,
+                      obscureText: true,
+                      style: const TextStyle(
+                          color: AppColors.textPrimary, fontSize: 13),
+                      decoration: InputDecoration(
+                        hintText: 'Secret',
+                        errorText: _error,
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
+                        isDense: true,
+                      ),
+                      onSubmitted: (_) => _tryUnlock(),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  AppButton(
+                    label: 'Unlock',
+                    onPressed: _unlocking ? null : _tryUnlock,
+                    size: AppButtonSize.compact,
+                    isLoading: _unlocking,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Unlocked: show inspector entry + lock option.
+    return _Section(
+      label: 'Developer',
+      child: Column(
+        children: [
+          _SectionRow(
+            onTap: () =>
+                Navigator.pushNamed(context, AppRoutes.adminInspector),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.analytics_outlined,
+                  size: 18,
+                  color: AppColors.brandPrimary,
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Open Delegation Inspector',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: AppColors.brandPrimary,
+                              fontWeight: FontWeight.w500,
+                            ),
+                      ),
+                      Text(
+                        'Live routing preview, decision log, brain diff',
+                        style: Theme.of(context)
+                            .textTheme
+                            .labelSmall
+                            ?.copyWith(color: AppColors.textTertiary),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(
+                  Icons.chevron_right,
+                  size: 16,
+                  color: AppColors.textTertiary,
+                ),
+              ],
+            ),
+          ),
+          _SectionRow(
+            isLast: true,
+            onTap: () async {
+              await ref.read(adminGateNotifierProvider.notifier).lock();
+            },
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.lock_outline,
+                  size: 16,
+                  color: AppColors.statusErrorFg,
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Text(
+                  'Lock Developer Access',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppColors.statusErrorFg,
+                        fontWeight: FontWeight.w500,
+                      ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 // ── Help & tutorials section ──────────────────────────────────────────────────
 
 class _HelpSection extends StatelessWidget {
@@ -995,7 +1089,7 @@ class _HelpSection extends StatelessWidget {
                 Container(
                   width: 36,
                   height: 36,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: AppColors.statusErrorBg,
                     borderRadius: AppRadii.borderMd,
                   ),
@@ -1047,7 +1141,7 @@ class _HelpSection extends StatelessWidget {
                 Container(
                   width: 36,
                   height: 36,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: AppColors.statusInfoBg,
                     borderRadius: AppRadii.borderMd,
                   ),
@@ -1121,7 +1215,7 @@ class _AboutSection extends StatelessWidget {
                 Container(
                   width: 36,
                   height: 36,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: AppColors.brandPrimary,
                     borderRadius: AppRadii.borderMd,
                   ),

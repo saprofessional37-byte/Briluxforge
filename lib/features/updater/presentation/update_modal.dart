@@ -8,7 +8,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:briluxforge/core/constants/app_constants.dart';
 import 'package:briluxforge/core/theme/app_colors.dart';
-import 'package:briluxforge/core/theme/app_spacing.dart';
 import 'package:briluxforge/core/theme/app_tokens.dart';
 import 'package:briluxforge/features/updater/data/models/update_state.dart';
 import 'package:briluxforge/features/updater/presentation/widgets/release_notes_view.dart';
@@ -25,7 +24,6 @@ Future<void> showUpdateModal(
 ) {
   return showDialog<void>(
     context: context,
-    barrierDismissible: true,
     builder: (ctx) => _UpdateModal(state: state),
   );
 }
@@ -51,9 +49,9 @@ class _UpdateModal extends ConsumerWidget {
     return Dialog(
       backgroundColor: AppColors.surfaceElevatedDark,
       elevation: 2,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: AppRadii.borderMd,
-        side: const BorderSide(color: AppColors.borderDark),
+        side: BorderSide(color: AppColors.borderDark),
       ),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 480),

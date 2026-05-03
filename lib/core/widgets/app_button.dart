@@ -75,6 +75,11 @@ class AppButton extends StatelessWidget {
 }
 
 // ── Primary ──────────────────────────────────────────────────────────────────
+//
+// Phase 13 fix: replaced the Stack-with-Positioned-1px-slab highlight with a
+// vertical LinearGradient inside the button's decoration. The gradient is
+// painted as a BoxDecoration fill, so it follows the ClipRRect corner radius
+// naturally — no horizontal edge artefacts are possible.
 
 class _PrimaryButton extends StatefulWidget {
   const _PrimaryButton({
@@ -103,7 +108,7 @@ class _PrimaryButtonState extends State<_PrimaryButton> {
   @override
   Widget build(BuildContext context) {
     final isDisabled = widget.onPressed == null;
-    final bg = isDisabled
+    final baseColor = isDisabled
         ? AppColors.brandPrimaryMuted.withValues(alpha: 0.4)
         : _hovered
             ? AppColors.brandPrimary
@@ -121,58 +126,50 @@ class _PrimaryButtonState extends State<_PrimaryButton> {
           height: widget.height,
           padding: widget.padding,
           decoration: BoxDecoration(
-            color: bg,
+            // Gradient: subtle top-to-transparent luminance fade (~40% height),
+            // then solid base color. Follows the border radius naturally.
+            gradient: isDisabled
+                ? null
+                : LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: const Alignment(0, -0.2),
+                    colors: [
+                      Colors.white.withValues(alpha: 0.06),
+                      Colors.transparent,
+                    ],
+                  ),
+            color: baseColor,
             borderRadius: AppRadii.borderSm,
             boxShadow: isDisabled ? AppElevation.none : AppElevation.subtle,
           ),
-          child: Stack(
-            children: [
-              // Top inner highlight — simulates lit-from-above depth
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: Container(
-                  height: 1,
-                  decoration: const BoxDecoration(
-                    color: Color(0x1FFFFFFF), // white @ 12%
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(AppRadii.sm),
-                      topRight: Radius.circular(AppRadii.sm),
+          child: Center(
+            child: widget.isLoading
+                ? const SizedBox(
+                    width: 14,
+                    height: 14,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
                     ),
-                  ),
-                ),
-              ),
-              Center(
-                child: widget.isLoading
-                    ? const SizedBox(
-                        width: 14,
-                        height: 14,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
+                  )
+                : Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (widget.leadingIcon != null) ...[
+                        Icon(widget.leadingIcon,
+                            size: 16, color: Colors.white),
+                        const SizedBox(width: AppSpacing.xs),
+                      ],
+                      Text(
+                        widget.label,
+                        style: const TextStyle(
                           color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
                         ),
-                      )
-                    : Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (widget.leadingIcon != null) ...[
-                            Icon(widget.leadingIcon,
-                                size: 16, color: Colors.white),
-                            const SizedBox(width: AppSpacing.xs),
-                          ],
-                          Text(
-                            widget.label,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
                       ),
-              ),
-            ],
+                    ],
+                  ),
           ),
         ),
       ),
@@ -307,7 +304,9 @@ class _GhostButtonState extends State<_GhostButton> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final fg = isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+    final fg = isDark
+        ? AppColors.textSecondaryDark
+        : AppColors.textSecondaryLight;
     final hoverBg = isDark
         ? Colors.white.withValues(alpha: 0.06)
         : Colors.black.withValues(alpha: 0.06);

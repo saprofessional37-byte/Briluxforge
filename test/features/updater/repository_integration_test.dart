@@ -10,7 +10,6 @@
 // PREREQUISITE: run `dart run build_runner build --delete-conflicting-outputs`
 // before running these tests.
 
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -338,7 +337,7 @@ void main() {
       await tempDir.delete(recursive: true);
     });
 
-    UpdateArtifact _makeArtifact({
+    UpdateArtifact makeArtifact({
       String? sha256Override,
       String? sigOverride,
       String? urlOverride,
@@ -353,7 +352,7 @@ void main() {
       );
     }
 
-    BinaryDownloadRepository _makeRepo() {
+    BinaryDownloadRepository makeRepo() {
       return BinaryDownloadRepository(
         httpClient: http.Client(),
         verifySignature: _makeVerifyFn(testPublicKeyBytes),
@@ -364,12 +363,12 @@ void main() {
     test(
         'download streams progress and stages verified payload in pendingDir',
         () async {
-      final repo = _makeRepo();
+      final repo = makeRepo();
       final events = <DownloadProgress>[];
 
       await repo
           .download(
-            artifact: _makeArtifact(),
+            artifact: makeArtifact(),
             stagingDir: stagingDir,
             pendingDir: pendingDir,
             targetVersion: '1.2.3',
@@ -405,12 +404,12 @@ void main() {
     test(
         'download throws ArtifactVerificationException on SHA-256 mismatch',
         () async {
-      final repo = _makeRepo();
+      final repo = makeRepo();
 
       expect(
         () => repo
             .download(
-              artifact: _makeArtifact(
+              artifact: makeArtifact(
                 sha256Override: 'deadbeef' * 8, // wrong hash, correct length
               ),
               stagingDir: stagingDir,
@@ -426,7 +425,7 @@ void main() {
     test(
         'download throws ArtifactVerificationException on Ed25519 mismatch',
         () async {
-      final repo = _makeRepo();
+      final repo = makeRepo();
       // Use a different key pair for signing → signature mismatch.
       final wrongKey = await Ed25519().newKeyPair();
       final wrongSig = await _signBase64(binaryPayload, wrongKey);
@@ -434,7 +433,7 @@ void main() {
       expect(
         () => repo
             .download(
-              artifact: _makeArtifact(sigOverride: wrongSig),
+              artifact: makeArtifact(sigOverride: wrongSig),
               stagingDir: stagingDir,
               pendingDir: pendingDir,
               targetVersion: '1.2.3',
@@ -453,12 +452,12 @@ void main() {
       final partialFile = File('${stagingDir.path}/payload.partial');
       await partialFile.writeAsBytes(binaryPayload.sublist(0, 512));
 
-      final repo = _makeRepo();
+      final repo = makeRepo();
       final events = <DownloadProgress>[];
 
       await repo
           .download(
-            artifact: _makeArtifact(),
+            artifact: makeArtifact(),
             stagingDir: stagingDir,
             pendingDir: pendingDir,
             targetVersion: '1.2.3',
@@ -510,7 +509,7 @@ void main() {
       await tempDir.delete(recursive: true);
     });
 
-    BrainUpdateInfo _makeBrainInfo({
+    BrainUpdateInfo makeBrainInfo({
       String? sha256Override,
       String? sigOverride,
     }) {
@@ -523,7 +522,7 @@ void main() {
       );
     }
 
-    BrainRepository _makeRepo() {
+    BrainRepository makeBrainRepo() {
       return BrainRepository(
         httpClient: http.Client(),
         verifySignature: _makeVerifyFn(testPublicKeyBytes),
@@ -534,10 +533,10 @@ void main() {
     test('fetchAndApply writes brain to targetFile and returns version',
         () async {
       final targetFile = File('${tempDir.path}/brain/current.json');
-      final repo = _makeRepo();
+      final repo = makeBrainRepo();
 
       final version = await repo.fetchAndApply(
-        brainInfo: _makeBrainInfo(),
+        brainInfo: makeBrainInfo(),
         targetFile: targetFile,
       );
 
@@ -554,11 +553,11 @@ void main() {
         'fetchAndApply throws ArtifactVerificationException on SHA-256 mismatch',
         () async {
       final targetFile = File('${tempDir.path}/brain/current.json');
-      final repo = _makeRepo();
+      final repo = makeBrainRepo();
 
       await expectLater(
         repo.fetchAndApply(
-          brainInfo: _makeBrainInfo(sha256Override: 'cafebabe' * 8),
+          brainInfo: makeBrainInfo(sha256Override: 'cafebabe' * 8),
           targetFile: targetFile,
         ),
         throwsA(isA<ArtifactVerificationException>()),
@@ -574,11 +573,11 @@ void main() {
       final targetFile = File('${tempDir.path}/brain/current2.json');
       final wrongKey = await Ed25519().newKeyPair();
       final wrongSig = await _signBase64(brainPayload, wrongKey);
-      final repo = _makeRepo();
+      final repo = makeBrainRepo();
 
       await expectLater(
         repo.fetchAndApply(
-          brainInfo: _makeBrainInfo(sigOverride: wrongSig),
+          brainInfo: makeBrainInfo(sigOverride: wrongSig),
           targetFile: targetFile,
         ),
         throwsA(isA<ArtifactVerificationException>()),
@@ -589,10 +588,10 @@ void main() {
     // ── 4. Atomic write: no .tmp file left after success ───────────────────
     test('fetchAndApply leaves no .tmp file after successful write', () async {
       final targetFile = File('${tempDir.path}/brain/current3.json');
-      final repo = _makeRepo();
+      final repo = makeBrainRepo();
 
       await repo.fetchAndApply(
-        brainInfo: _makeBrainInfo(),
+        brainInfo: makeBrainInfo(),
         targetFile: targetFile,
       );
 

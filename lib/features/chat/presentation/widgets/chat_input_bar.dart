@@ -198,13 +198,13 @@ class _InputField extends StatelessWidget {
             horizontal: 16,
             vertical: 14,
           ),
-          border: OutlineInputBorder(
+          border: const OutlineInputBorder(
             borderRadius: AppRadii.borderMd,
-            borderSide: const BorderSide(color: AppColors.borderDark),
+            borderSide: BorderSide(color: AppColors.borderDark),
           ),
-          enabledBorder: OutlineInputBorder(
+          enabledBorder: const OutlineInputBorder(
             borderRadius: AppRadii.borderMd,
-            borderSide: const BorderSide(color: AppColors.borderDark),
+            borderSide: BorderSide(color: AppColors.borderDark),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: AppRadii.borderMd,
@@ -212,9 +212,9 @@ class _InputField extends StatelessWidget {
               color: AppColors.primary.withValues(alpha: 0.6),
             ),
           ),
-          disabledBorder: OutlineInputBorder(
+          disabledBorder: const OutlineInputBorder(
             borderRadius: AppRadii.borderMd,
-            borderSide: const BorderSide(color: AppColors.borderDark),
+            borderSide: BorderSide(color: AppColors.borderDark),
           ),
         ),
         autofocus: true,
@@ -309,7 +309,7 @@ class _SkillsQuickPanel extends ConsumerWidget {
             width: 36,
             height: 4,
             margin: const EdgeInsets.only(bottom: 16),
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: AppColors.borderDark,
               borderRadius: AppRadii.borderXs,
             ),

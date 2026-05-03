@@ -33,19 +33,16 @@ class App extends ConsumerWidget {
       }
     });
 
-    final themeMode =
-        ref.watch(settingsNotifierProvider).valueOrNull?.themeMode ??
-            ThemeMode.dark;
-
     // Build the window title from the active conversation.
     final conversationTitle = ref
         .watch(chatNotifierProvider.select((s) => s.conversation?.title));
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: themeMode,
+      // Phase 13 §13.6: locked to dark mode pending a per-screen light-theme
+      // audit. The isDark-parameterised AppColors getters are retained for
+      // trivial re-enablement later. ThemeMode field is removed — one theme.
+      theme: AppTheme.darkTheme,
       navigatorKey: _navigatorKey,
       onGenerateTitle: (_) => conversationTitle != null
           ? 'Briluxforge — $conversationTitle'
@@ -57,7 +54,7 @@ class App extends ConsumerWidget {
 }
 
 /// Declarative root — watches auth, onboarding, and license state and
-/// returns the correct screen. AuthGate is never pushed as a named route.
+/// returns the correct screen.
 class _AuthGate extends ConsumerWidget {
   const _AuthGate();
 
@@ -87,9 +84,6 @@ class _AuthGate extends ConsumerWidget {
                   return const LicenseKeyInputScreen(isDismissable: false);
                 }
 
-                // Run the DefaultModelReconciler before allowing chat access.
-                // Never blocks on error — a reconciler failure must not prevent
-                // the user from reaching the home screen.
                 final reconcilerAsync =
                     ref.watch(defaultModelReconcilerProvider);
                 return reconcilerAsync.when(

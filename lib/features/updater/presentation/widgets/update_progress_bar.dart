@@ -6,7 +6,6 @@
 import 'package:flutter/material.dart';
 
 import 'package:briluxforge/core/theme/app_colors.dart';
-import 'package:briluxforge/core/theme/app_spacing.dart';
 import 'package:briluxforge/core/theme/app_tokens.dart';
 
 /// Themed animated progress bar for the updater UI.
@@ -29,9 +28,9 @@ class UpdateProgressBar extends StatelessWidget {
   Widget build(BuildContext context) {
     if (progress == null) {
       // Indeterminate — delegate to Material's LinearProgressIndicator.
-      return LinearProgressIndicator(
+      return const LinearProgressIndicator(
         backgroundColor: AppColors.borderDark,
-        valueColor: const AlwaysStoppedAnimation<Color>(AppColors.accent),
+        valueColor: AlwaysStoppedAnimation<Color>(AppColors.accent),
         minHeight: AppSpacing.sm,
         borderRadius: AppRadii.borderXs,
       );
@@ -47,7 +46,7 @@ class UpdateProgressBar extends StatelessWidget {
         return Container(
           height: AppSpacing.sm,
           width: totalWidth,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: AppColors.borderDark,
             borderRadius: AppRadii.borderXs,
           ),
@@ -58,7 +57,7 @@ class UpdateProgressBar extends StatelessWidget {
               curve: Curves.easeOutCubic,
               height: AppSpacing.sm,
               width: filledWidth,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: AppColors.accent,
                 borderRadius: AppRadii.borderXs,
               ),

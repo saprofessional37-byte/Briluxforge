@@ -236,7 +236,7 @@ class _StepDot extends StatelessWidget {
         ),
       ),
       child: isDone
-          ? Icon(Icons.check, size: 12, color: AppColors.statusSuccessFg)
+          ? const Icon(Icons.check, size: 12, color: AppColors.statusSuccessFg)
           : isCurrent
               ? Center(
                   child: Container(
@@ -794,17 +794,17 @@ class _AddKeyPageState extends ConsumerState<_AddKeyPage> {
               ),
               filled: true,
               fillColor: AppColors.surfaceBase,
-              border: OutlineInputBorder(
+              border: const OutlineInputBorder(
                 borderRadius: AppRadii.borderSm,
-                borderSide: const BorderSide(color: AppColors.borderSubtle),
+                borderSide: BorderSide(color: AppColors.borderSubtle),
               ),
-              enabledBorder: OutlineInputBorder(
+              enabledBorder: const OutlineInputBorder(
                 borderRadius: AppRadii.borderSm,
-                borderSide: const BorderSide(color: AppColors.borderSubtle),
+                borderSide: BorderSide(color: AppColors.borderSubtle),
               ),
-              focusedBorder: OutlineInputBorder(
+              focusedBorder: const OutlineInputBorder(
                 borderRadius: AppRadii.borderSm,
-                borderSide: const BorderSide(
+                borderSide: BorderSide(
                     color: AppColors.brandPrimary, width: 1.5),
               ),
               contentPadding: const EdgeInsets.symmetric(

@@ -17,6 +17,8 @@ const ModelProfile _deepseek = ModelProfile(
   costPer1kInput: 0.00014,
   costPer1kOutput: 0.00028,
   tier: 'workhorse',
+  latencyHintMs: 1800,
+  descriptionForAdmin: 'Cost-efficient coding specialist.',
 );
 
 const ModelProfile _opusBenchmark = ModelProfile(
@@ -28,6 +30,8 @@ const ModelProfile _opusBenchmark = ModelProfile(
   costPer1kInput: 0.005,
   costPer1kOutput: 0.025,
   tier: 'premium',
+  latencyHintMs: 3500,
+  descriptionForAdmin: 'Benchmark-only model.',
   isBenchmark: true,
 );
 
@@ -41,6 +45,8 @@ const ModelProfile _superExpensive = ModelProfile(
   costPer1kInput: 0.010,
   costPer1kOutput: 0.050,
   tier: 'premium',
+  latencyHintMs: 999,
+  descriptionForAdmin: 'Hypothetical expensive model for testing.',
 );
 
 const _calculator = SavingsCalculator();
@@ -211,6 +217,8 @@ void main() {
           costPer1kInput: 0.006,  // $1 higher per 1M input
           costPer1kOutput: 0.030, // $5 higher per 1M output
           tier: 'premium',
+          latencyHintMs: 3500,
+          descriptionForAdmin: 'Benchmark-only model at new price point.',
           isBenchmark: true,
         );
 

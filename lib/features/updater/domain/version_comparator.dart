@@ -53,7 +53,7 @@ abstract final class VersionComparator {
   /// Accepts bare two-part versions (1.2) by treating missing patch as 0.
   static List<int> _parse(String version) {
     // Strip build metadata (+...) then pre-release (-...).
-    var v = version.split('+').first.split('-').first.trim();
+    final v = version.split('+').first.split('-').first.trim();
 
     final parts = v.split('.');
     if (parts.length < 2 || parts.length > 4) {

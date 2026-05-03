@@ -197,18 +197,18 @@ class _AddKeyPanelState extends ConsumerState<_AddKeyPanel> {
               ),
               filled: true,
               fillColor: AppColors.backgroundDark,
-              border: OutlineInputBorder(
+              border: const OutlineInputBorder(
                 borderRadius: AppRadii.borderMd,
-                borderSide: const BorderSide(color: AppColors.borderDark),
+                borderSide: BorderSide(color: AppColors.borderDark),
               ),
-              enabledBorder: OutlineInputBorder(
+              enabledBorder: const OutlineInputBorder(
                 borderRadius: AppRadii.borderMd,
-                borderSide: const BorderSide(color: AppColors.borderDark),
+                borderSide: BorderSide(color: AppColors.borderDark),
               ),
-              focusedBorder: OutlineInputBorder(
+              focusedBorder: const OutlineInputBorder(
                 borderRadius: AppRadii.borderMd,
                 borderSide:
-                    const BorderSide(color: AppColors.primary, width: 1.5),
+                    BorderSide(color: AppColors.primary, width: 1.5),
               ),
               contentPadding:
                   const EdgeInsets.symmetric(horizontal: 16, vertical: 14),

@@ -253,22 +253,22 @@ class _FormField extends StatelessWidget {
                 : AppColors.surfaceElevatedDark,
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-            border: OutlineInputBorder(
+            border: const OutlineInputBorder(
               borderRadius: AppRadii.borderMd,
-              borderSide: const BorderSide(color: AppColors.borderDark),
+              borderSide: BorderSide(color: AppColors.borderDark),
             ),
-            enabledBorder: OutlineInputBorder(
+            enabledBorder: const OutlineInputBorder(
               borderRadius: AppRadii.borderMd,
-              borderSide: const BorderSide(color: AppColors.borderDark),
+              borderSide: BorderSide(color: AppColors.borderDark),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: AppRadii.borderMd,
               borderSide:
                   BorderSide(color: AppColors.primary.withValues(alpha: 0.6)),
             ),
-            disabledBorder: OutlineInputBorder(
+            disabledBorder: const OutlineInputBorder(
               borderRadius: AppRadii.borderMd,
-              borderSide: const BorderSide(color: AppColors.borderDark),
+              borderSide: BorderSide(color: AppColors.borderDark),
             ),
           ),
         ),
